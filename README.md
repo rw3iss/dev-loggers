@@ -1,15 +1,27 @@
-# get-logger
+# get-loggers
 
 Minimal < 500 lines, no dependency, and flexible application logging system. Loggers are created by namespace and maintain app-wide singleton instances for care towards resource awareness. Focus on deconstruction, extension, and minimalism for barebones/simple client usage.
 
+## Installation
+Pick one:
+```
+yarn add get-loggers
+
+pnpm install get-loggers
+
+npm install get-loggers
+```
+
 ## Usage
+Import the method for whichever logger you want:
+```
+import { getLogger, getPerformanceLogger, getBufferedLogger } from 'get-logger';
+```
+
 ### Logger:
 Basic logging with namespacing, coloring, and options (see below for more options).
 
 ```
-import { getLogger } from 'get-logger';
-
-// basic usage:
 const { log, warn, error } = getLogger('SomeName');
 log('a', 'message', someData); 		// prints "SomeName: a message {...}"
 
@@ -48,6 +60,17 @@ Register the custom LogModule class with the logging system:
 ```
 import { addLogModule } from 'get-logger';
 addLogModule(new DebugPanelLogModule());
+```
+
+## Logger Options:
+```
+export type LoggerOptions = {
+	namespace?: string;
+	color?: string;
+	enabled?: boolean;
+	prefix?: string;
+	postfix?: string;
+};
 ```
 
 ## Custom Output

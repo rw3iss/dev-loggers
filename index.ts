@@ -1,4 +1,4 @@
-// get-logger:
+// get-loggers:
 //
 // Logger: Basic logging with namespacing, coloring, options.
 // PerformanceLogger: prints time between statements with the same ID (first argument).
@@ -270,7 +270,7 @@ export class Logger {
 }
 
 export class PerformanceLogger extends Logger {
-	//public opts: PerformanceLoggerOptions = DEFAULT_PERFORMANCE_LOGGER_OPTIONS;
+	public opts: PerformanceLoggerOptions = DEFAULT_PERFORMANCE_LOGGER_OPTIONS;
 	public counts: Map<string, number> = new Map<string, number>(); // msg id => call counts
 	public times: Map<string, number> = new Map<string, number>(); // msg id => last msg time (for profiling)
 
@@ -294,7 +294,7 @@ export class PerformanceLogger extends Logger {
 		if (!args?.length) return this;
 		const msgIndex = args[0];
 		const msSinceLast = this.time(msgIndex); // log time since since this last same msg
-		this.incr(msgIndex);
+		if (this.opts.logCounts) this.incr(msgIndex);
 		log(this.opts.namespace, ...this.addArgs(args));
 		return this;
 		// this does not work, super.log doesn't work with arrow members.
@@ -305,8 +305,10 @@ export class PerformanceLogger extends Logger {
 	// log and increment
 	public logIncr = (...args): PerformanceLogger => {
 		if (!args?.length) return this;
-		const msgIndex = args[0];
-		this.incr(msgIndex);
+		if (this.opts.logCounts) {
+			const msgIndex = args[0];
+			this.incr(msgIndex);
+		}
 		this.log(...args);
 		return this;
 	};
