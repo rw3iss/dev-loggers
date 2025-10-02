@@ -13,7 +13,7 @@ npm install get-loggers
 ## Usage
 Import the method for whichever logger you want:
 ```
-import { getLogger, getPerformanceLogger, getBufferedLogger } from 'get-logger';
+import { getLogger, getPerformanceLogger, getBufferedLogger } from 'get-loggers';
 ```
 
 ### Logger:
@@ -58,7 +58,7 @@ export class DebugPanelLogModule implements LogModule {
 
 Register the custom LogModule class with the logging system:
 ```
-import { addLogModule } from 'get-logger';
+import { addLogModule } from 'get-loggers';
 addLogModule(new DebugPanelLogModule());
 ```
 
@@ -76,6 +76,6 @@ export type LoggerOptions = {
 ## Custom Output
 All loggers output to console.log, but this can be changed by importing and calling setLogOutput(output):
 ```
-import { setLogOutput } from 'get-logger';
+import { setLogOutput } from 'get-loggers';
 setLogOutput(someOtherStream);
 ```
