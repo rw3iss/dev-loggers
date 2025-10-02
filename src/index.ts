@@ -294,7 +294,8 @@ export class PerformanceLogger extends Logger {
 		const msgIndex = args[0];
 		const msSinceLast = this.time(msgIndex); // log time since since this last same msg
 		if ((this.opts as PerformanceLoggerOptions).logCounts) this.incr(msgIndex);
-		log(this.opts.namespace, ...this.addArgs(args));
+		const timeMsg = msSinceLast ? `(${msSinceLast}ms)` : '';
+		log(this.opts.namespace, ...this.addArgs(args), timeMsg);
 		return this;
 		// this does not work, super.log doesn't work with arrow members.
 		// this.log(...args, msSinceLast ? `(${msSinceLast}ms)` : '');
