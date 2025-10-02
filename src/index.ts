@@ -270,7 +270,6 @@ export class Logger {
 }
 
 export class PerformanceLogger extends Logger {
-	public opts: PerformanceLoggerOptions = DEFAULT_PERFORMANCE_LOGGER_OPTIONS;
 	public counts: Map<string, number> = new Map<string, number>(); // msg id => call counts
 	public times: Map<string, number> = new Map<string, number>(); // msg id => last msg time (for profiling)
 
@@ -294,7 +293,7 @@ export class PerformanceLogger extends Logger {
 		if (!args?.length) return this;
 		const msgIndex = args[0];
 		const msSinceLast = this.time(msgIndex); // log time since since this last same msg
-		if (this.opts.logCounts) this.incr(msgIndex);
+		if ((this.opts as PerformanceLoggerOptions).logCounts) this.incr(msgIndex);
 		log(this.opts.namespace, ...this.addArgs(args));
 		return this;
 		// this does not work, super.log doesn't work with arrow members.
@@ -305,7 +304,7 @@ export class PerformanceLogger extends Logger {
 	// log and increment
 	public logIncr = (...args): PerformanceLogger => {
 		if (!args?.length) return this;
-		if (this.opts.logCounts) {
+		if ((this.opts as PerformanceLoggerOptions).logCounts) {
 			const msgIndex = args[0];
 			this.incr(msgIndex);
 		}
@@ -358,8 +357,6 @@ export class BufferedLogger extends Logger {
 
 	public flush = (): BufferedLogger => {
 		this.logs.forEach(l => log(this.opts.namespace, ...l));
-		//log(this.opts.namespace, ...this.logs);// ...this.addArgs(args));
-		return this;
 		this.logs = [];
 		return this;
 	};

@@ -214,7 +214,6 @@ export class Logger {
 export class PerformanceLogger extends Logger {
     constructor(namespace, opts = DEFAULT_PERFORMANCE_LOGGER_OPTIONS) {
         super(namespace, opts);
-        this.opts = DEFAULT_PERFORMANCE_LOGGER_OPTIONS;
         this.counts = new Map(); // msg id => call counts
         this.times = new Map(); // msg id => last msg time (for profiling)
         // logs and also mentions time since last log with same text
@@ -290,8 +289,6 @@ export class BufferedLogger extends Logger {
         };
         this.flush = () => {
             this.logs.forEach(l => log(this.opts.namespace, ...l));
-            //log(this.opts.namespace, ...this.logs);// ...this.addArgs(args));
-            return this;
             this.logs = [];
             return this;
         };
