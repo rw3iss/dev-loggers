@@ -1,18 +1,18 @@
 {
-	"name": "minimal-logging",
+	"name": "get-logger",
 	"version": "1.0.0",
-	"description": "Minimal logging functionality in < 500kb. Includes basic Logger, PerformanceLogger, and BufferedLogger. Supports namespaces, colors, and options, as well as LogModules for external classes to hook into the logging system.",
+	"description": "Minimal logging functionality in < 500 lines. Supports namespaces, colors, and options, as well as LogModules for external classes to hook into the logging system. Includes basic Logger, PerformanceLogger, and BufferedLogger.",
 	"keywords": [
 		"logging",
 		"logger"
 	],
-	"homepage": "https://github.com/rw3iss/logging.ts#readme",
+	"homepage": "https://github.com/rw3iss/get-logger#readme",
 	"bugs": {
-		"url": "https://github.com/rw3iss/logging.ts/issues"
+		"url": "https://github.com/rw3iss/get-logger/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/rw3iss/logging.ts.git"
+		"url": "git+https://github.com/rw3iss/get-logger.git"
 	},
 	"author": {
 		"name": "Ryan Weiss",
