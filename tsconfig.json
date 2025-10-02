@@ -1,0 +1,35 @@
+{
+	"compilerOptions": {
+		"module": "nodenext",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"target": "es6",
+		"noImplicitAny": false,
+		"moduleResolution": "nodenext",
+		"sourceMap": true,
+		"outDir": "dist",
+		"baseUrl": ".",
+		"allowJs": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"preserveConstEnums": true,
+		"forceConsistentCasingInFileNames": true,
+		"strictNullChecks": true,
+		"skipLibCheck": true,
+		"paths": {},
+		"lib": [
+			"ES2022",
+			"dom",
+			"dom.iterable"
+		],
+		"strict": false,
+		"preserveWatchOutput": true
+	},
+	"include": [
+		"src"
+	],
+	"exclude": [
+		"dist",
+		"node_modules"
+	]
+}

@@ -1,0 +1,504 @@
+// This is auto-generated AI code from the original, with improvements, to clean.
+
+/**
+ * Minimal no-dependency logging framework
+ *
+ * Provides three logger types:
+ * - Logger: Basic logging with namespacing and configuration
+ * - PerformanceLogger: Tracks time between log statements with the same ID
+ * - BufferedLogger: Accumulates logs until flush() is called
+ *
+ * @example
+ * ```typescript
+ * import { getLogger, getPerformanceLogger, getBufferedLogger } from './logging';
+ *
+ * // Basic logger
+ * const { log, warn, error } = getLogger('MyApp');
+ * log('Application started');
+ *
+ * // Performance logger
+ * const perfLog = getPerformanceLogger('Performance');
+ * perfLog.log('operation-1', 'Starting operation');
+ * perfLog.log('operation-1', 'Operation complete'); // Shows elapsed time
+ *
+ * // Buffered logger
+ * const buffered = getBufferedLogger('Batch');
+ * buffered.log('Message 1');
+ * buffered.log('Message 2');
+ * buffered.flush(); // Outputs all at once
+ * ```
+ */
+
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+
+export const LOG_ERROR_TRACES = false;
+export const ALWAYS_LOG_ERRORS = true;
+export const ALWAYS_LOG_WARNINGS = false;
+export const COLORS_ENABLED = process.env.LOGGING_COLORS_ENABLED === 'true';
+export const DEFAULT_LOG_COLOR = 'yellow';
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface LogEvent {
+	namespace: string;
+	args: any[];
+}
+
+export interface LogModule {
+	name: string;
+	onLog(event: LogEvent): void;
+}
+
+export interface LoggerOptions {
+	namespace?: string;
+	color?: string;
+	enabled?: boolean;
+	prefix?: string;
+	postfix?: string;
+}
+
+export interface PerformanceLoggerOptions extends LoggerOptions {
+	logCounts?: boolean;
+}
+
+export interface BufferedLoggerOptions extends LoggerOptions {
+	maxBufferSize?: number;
+}
+
+// ============================================================================
+// ANSI COLORS
+// ============================================================================
+
+export const Colors = {
+	reset: '\x1b[0m',
+	bright: '\x1b[1m',
+	dim: '\x1b[2m',
+	underscore: '\x1b[4m',
+	blink: '\x1b[5m',
+	reverse: '\x1b[7m',
+	hidden: '\x1b[8m',
+
+	black: '\x1b[30m',
+	red: '\x1b[31m',
+	green: '\x1b[32m',
+	orange: '\x1b[48:5:208m',
+	yellow: '\x1b[33m',
+	blue: '\x1b[34m',
+	purple: '\x1b[95m',
+	darkcyan: '\x1b[36m',
+	magenta: '\x1b[35m',
+	cyan: '\x1b[36m',
+	white: '\x1b[37m',
+
+	BGblack: '\x1b[40m',
+	BGred: '\x1b[41m',
+	BGgreen: '\x1b[42m',
+	BGyellow: '\x1b[43m',
+	BGblue: '\x1b[44m',
+	BGmagenta: '\x1b[45m',
+	BGcyan: '\x1b[46m',
+	BGwhite: '\x1b[47m'
+} as const;
+
+export function color(colorName: keyof typeof Colors | string, str: string): string {
+	if (!COLORS_ENABLED) return str;
+	const colorCode = colorName.includes('\x1b') ? colorName : Colors[colorName as keyof typeof Colors];
+	return colorCode ? `${colorCode}${str}${Colors.reset}` : str;
+}
+
+// ============================================================================
+// GLOBAL STATE
+// ============================================================================
+
+class LoggerRegistry {
+	private loggers = new Map<string, Logger | PerformanceLogger | BufferedLogger>();
+	private modules: LogModule[] = [];
+	private logAllMode = false;
+	private logOnlyNamespaces?: Set<string>;
+
+	getLogger(namespace: string): Logger | PerformanceLogger | BufferedLogger | undefined {
+		return this.loggers.get(namespace);
+	}
+
+	setLogger(namespace: string, logger: Logger | PerformanceLogger | BufferedLogger): void {
+		this.loggers.set(namespace, logger);
+	}
+
+	addModule(module: LogModule): void {
+		this.modules.push(module);
+	}
+
+	getModules(): LogModule[] {
+		return this.modules;
+	}
+
+	shouldLog(namespace: string, enabled: boolean): boolean {
+		if (this.logAllMode) {
+			return !this.logOnlyNamespaces || this.logOnlyNamespaces.has(namespace);
+		}
+		return enabled;
+	}
+
+	setLogAllMode(enabled: boolean, onlyNamespaces?: string[]): void {
+		this.logAllMode = enabled;
+		this.logOnlyNamespaces = onlyNamespaces ? new Set(onlyNamespaces) : undefined;
+	}
+
+	getAllLoggers(): Map<string, Logger | PerformanceLogger | BufferedLogger> {
+		return this.loggers;
+	}
+}
+
+const registry = new LoggerRegistry();
+
+// Expose to global for debugging (browser/Node.js compatible)
+if (typeof globalThis !== 'undefined') {
+	(globalThis as any).loggers = registry;
+}
+
+// ============================================================================
+// LOG MODULES
+// ============================================================================
+
+export function addLogModule(module: LogModule): void {
+	registry.addModule(module);
+}
+
+// ============================================================================
+// LOGGER FACTORY FUNCTIONS
+// ============================================================================
+
+const DEFAULT_LOGGER_OPTIONS: Required<LoggerOptions> = {
+	namespace: '',
+	color: DEFAULT_LOG_COLOR,
+	enabled: true,
+	prefix: '',
+	postfix: ''
+};
+
+const DEFAULT_PERFORMANCE_LOGGER_OPTIONS: Required<PerformanceLoggerOptions> = {
+	...DEFAULT_LOGGER_OPTIONS,
+	logCounts: true
+};
+
+const DEFAULT_BUFFERED_LOGGER_OPTIONS: Required<BufferedLoggerOptions> = {
+	...DEFAULT_LOGGER_OPTIONS,
+	maxBufferSize: 1000
+};
+
+export function getLogger(namespace: string, opts: Partial<LoggerOptions> = {}): Logger {
+	if (!namespace) throw new Error('Must supply a namespace as first argument to getLogger');
+
+	let logger = registry.getLogger(namespace);
+	if (!logger) {
+		logger = new Logger(namespace, opts);
+		registry.setLogger(namespace, logger);
+	}
+	return logger as Logger;
+}
+
+export function getPerformanceLogger(
+	namespace: string,
+	opts: Partial<PerformanceLoggerOptions> = {}
+): PerformanceLogger {
+	if (!namespace) throw new Error('Must supply a namespace as first argument to getPerformanceLogger');
+
+	let logger = registry.getLogger(namespace);
+	if (!logger) {
+		logger = new PerformanceLogger(namespace, opts);
+		registry.setLogger(namespace, logger);
+	}
+	return logger as PerformanceLogger;
+}
+
+export function getBufferedLogger(
+	namespace: string,
+	opts: Partial<BufferedLoggerOptions> = {}
+): BufferedLogger {
+	if (!namespace) throw new Error('Must supply a namespace as first argument to getBufferedLogger');
+
+	let logger = registry.getLogger(namespace);
+	if (!logger) {
+		logger = new BufferedLogger(namespace, opts);
+		registry.setLogger(namespace, logger);
+	}
+	return logger as BufferedLogger;
+}
+
+// ============================================================================
+// CORE LOGGING FUNCTIONS
+// ============================================================================
+
+function formatNamespace(namespace: string, color: string): string {
+	if (!namespace) return '';
+
+	if (COLORS_ENABLED) {
+		const colorCode = Colors[color as keyof typeof Colors] || Colors.white;
+		return `${colorCode}${namespace}:${Colors.reset}`;
+	}
+	return `${namespace}:`;
+}
+
+function emitLog(namespace: string, args: any[]): void {
+	const event: LogEvent = { namespace, args };
+	registry.getModules().forEach(module => module.onLog(event));
+	console.log(...args);
+}
+
+function getCallStack(): string {
+	const excludeKeywords = ['logging.ts', 'node:internal', 'node_modules'];
+	const obj: any = {};
+	Error.captureStackTrace(obj, getCallStack);
+	return obj.stack
+		.split('\n')
+		.filter((line: string) => !excludeKeywords.some(keyword => line.includes(keyword)))
+		.join('\n');
+}
+
+export function log(namespaceOrFirstArg: string, ...args: any[]): void {
+	const hasNamespace = typeof namespaceOrFirstArg === 'string' && registry.getLogger(namespaceOrFirstArg);
+	const namespace = hasNamespace ? namespaceOrFirstArg : '';
+	const logArgs = hasNamespace ? args : [namespaceOrFirstArg, ...args];
+
+	const logger = namespace ? registry.getLogger(namespace) : null;
+
+	if (logger && !registry.shouldLog(namespace, logger.opts.enabled)) {
+		return;
+	}
+
+	const formattedArgs = namespace && logger
+		? [formatNamespace(namespace, logger.opts.color), ...logArgs]
+		: logArgs;
+
+	emitLog(namespace, formattedArgs);
+}
+
+export function warn(namespaceOrFirstArg: string, ...args: any[]): void {
+	const hasNamespace = typeof namespaceOrFirstArg === 'string' && registry.getLogger(namespaceOrFirstArg);
+	const namespace = hasNamespace ? namespaceOrFirstArg : '';
+	const logArgs = hasNamespace ? args : [namespaceOrFirstArg, ...args];
+
+	const logger = namespace ? registry.getLogger(namespace) : null;
+
+	if (logger && !ALWAYS_LOG_WARNINGS && !registry.shouldLog(namespace, logger.opts.enabled)) {
+		return;
+	}
+
+	const prefix = namespace && logger
+		? `${formatNamespace(namespace, logger.opts.color)} ⚠️ Warning:`
+		: '⚠️ Warning:';
+
+	emitLog(namespace, [prefix, ...logArgs]);
+}
+
+export function error(namespaceOrFirstArg: string, ...args: any[]): void {
+	const hasNamespace = typeof namespaceOrFirstArg === 'string' && registry.getLogger(namespaceOrFirstArg);
+	const namespace = hasNamespace ? namespaceOrFirstArg : '';
+	const logArgs = hasNamespace ? args : [namespaceOrFirstArg, ...args];
+
+	const logger = namespace ? registry.getLogger(namespace) : null;
+
+	if (logger && !ALWAYS_LOG_ERRORS && !registry.shouldLog(namespace, logger.opts.enabled)) {
+		return;
+	}
+
+	const prefix = namespace && logger
+		? `${formatNamespace(namespace, logger.opts.color)} 🛑 Error!`
+		: '🛑 Error!';
+
+	const finalArgs = LOG_ERROR_TRACES
+		? [prefix, ...logArgs, '\nAt:', getCallStack()]
+		: [prefix, ...logArgs];
+
+	emitLog(namespace, finalArgs);
+}
+
+// ============================================================================
+// LOGGER CLASSES
+// ============================================================================
+
+export class Logger {
+	public opts: Required<LoggerOptions>;
+
+	constructor(namespace: string, opts: Partial<LoggerOptions> = {}) {
+		this.opts = {
+			...DEFAULT_LOGGER_OPTIONS,
+			...opts,
+			namespace: namespace || opts.namespace || ''
+		};
+	}
+
+	log(...args: any[]): this {
+		log(this.opts.namespace, ...this.applyFormatting(args));
+		return this;
+	}
+
+	warn(...args: any[]): this {
+		warn(this.opts.namespace, ...this.applyFormatting(args));
+		return this;
+	}
+
+	error(...args: any[]): this {
+		error(this.opts.namespace, ...this.applyFormatting(args));
+		return this;
+	}
+
+	setEnabled(enabled: boolean): this {
+		this.opts.enabled = enabled;
+		return this;
+	}
+
+	protected applyFormatting(args: any[]): any[] {
+		if (!this.opts.prefix && !this.opts.postfix) return args;
+
+		const formatted = [...args];
+		if (this.opts.prefix) formatted.unshift(this.opts.prefix);
+		if (this.opts.postfix) formatted.push(this.opts.postfix);
+		return formatted;
+	}
+}
+
+export class PerformanceLogger extends Logger {
+	public opts: Required<PerformanceLoggerOptions>;
+	private counts = new Map<string, number>();
+	private times = new Map<string, number>();
+
+	constructor(namespace: string, opts: Partial<PerformanceLoggerOptions> = {}) {
+		super(namespace, opts);
+		this.opts = {
+			...DEFAULT_PERFORMANCE_LOGGER_OPTIONS,
+			...this.opts,
+			...opts
+		};
+	}
+
+	log(...args: any[]): this {
+		if (args.length === 0) return this;
+
+		const id = String(args[0]);
+		const elapsed = this.recordTime(id);
+		this.incrementCount(id);
+
+		const formattedArgs = this.applyFormatting(args);
+		const finalArgs = elapsed !== undefined
+			? [...formattedArgs, `(${elapsed}ms)`]
+			: formattedArgs;
+
+		log(this.opts.namespace, ...finalArgs);
+		return this;
+	}
+
+	logIncr(...args: any[]): this {
+		if (args.length === 0) return this;
+		const id = String(args[0]);
+		this.incrementCount(id);
+		log(this.opts.namespace, ...this.applyFormatting(args));
+		return this;
+	}
+
+	incr(id: string): number {
+		return this.incrementCount(id);
+	}
+
+	time(id: string): number | undefined {
+		return this.recordTime(id);
+	}
+
+	printCounts(): this {
+		const entries = Array.from(this.counts.entries())
+			.sort((a, b) => b[1] - a[1]); // Sort by count descending
+
+		const lines = [
+			'Log call counts:',
+			'─'.repeat(60),
+			...entries.map(([id, count]) => `${count}:\t${id}`),
+			'─'.repeat(60)
+		];
+
+		log(this.opts.namespace, lines.join('\n'));
+		return this;
+	}
+
+	reset(): this {
+		this.counts.clear();
+		this.times.clear();
+		return this;
+	}
+
+	private incrementCount(id: string): number {
+		const count = (this.counts.get(id) || 0) + 1;
+		this.counts.set(id, count);
+		return count;
+	}
+
+	private recordTime(id: string): number | undefined {
+		const now = Date.now();
+		const last = this.times.get(id);
+		this.times.set(id, now);
+		return last !== undefined ? now - last : undefined;
+	}
+}
+
+export class BufferedLogger extends Logger {
+	public opts: Required<BufferedLoggerOptions>;
+	private buffer: any[][] = [];
+
+	constructor(namespace: string, opts: Partial<BufferedLoggerOptions> = {}) {
+		super(namespace, opts);
+		this.opts = {
+			...DEFAULT_BUFFERED_LOGGER_OPTIONS,
+			...this.opts,
+			...opts
+		};
+	}
+
+	log(...args: any[]): this {
+		if (this.buffer.length >= this.opts.maxBufferSize) {
+			this.warn('Buffer overflow: flushing automatically');
+			this.flush();
+		}
+		this.buffer.push(args);
+		return this;
+	}
+
+	flush(): this {
+		this.buffer.forEach(args => log(this.opts.namespace, ...args));
+		this.buffer = [];
+		return this;
+	}
+
+	clear(): this {
+		this.buffer = [];
+		return this;
+	}
+
+	getBufferSize(): number {
+		return this.buffer.length;
+	}
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+export function printLogs(): void {
+	registry.getAllLoggers().forEach(logger => {
+		if (logger instanceof PerformanceLogger) {
+			logger.printCounts();
+		}
+	});
+}
+
+export function setLogAllMode(enabled: boolean, onlyNamespaces?: string[]): void {
+	registry.setLogAllMode(enabled, onlyNamespaces);
+}
+
+// Expose utilities to global for debugging
+if (typeof globalThis !== 'undefined') {
+	(globalThis as any).printLogs = printLogs;
+	(globalThis as any).setLogAllMode = setLogAllMode;
+} 

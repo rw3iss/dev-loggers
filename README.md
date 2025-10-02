@@ -6,9 +6,7 @@ Minimal < 500 lines, no dependency, and flexible application logging system. Log
 Pick one:
 ```
 yarn add get-loggers
-
 pnpm install get-loggers
-
 npm install get-loggers
 ```
 
@@ -19,13 +17,15 @@ import { getLogger, getPerformanceLogger, getBufferedLogger } from 'get-logger';
 ```
 
 ### Logger:
-Basic logging with namespacing, coloring, and options (see below for more options).
+Basic logging with namespacing, coloring, and options (see below for more options). Call at the top of your file:
 
 ```
 const { log, warn, error } = getLogger('SomeName');
 log('a', 'message', someData); 		// prints "SomeName: a message {...}"
+```
 
-// extended option:
+Extended options:
+```
 const { log, warn, error } = getLogger('SomeName', { enabled: false, color: 'red', prefix: '[P]' });
 ```
 ### PerformanceLogger:
