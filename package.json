@@ -1,6 +1,6 @@
 {
 	"name": "get-logger",
-	"version": "1.1.4",
+	"version": "2.0.0",
 	"description": "Minimal API and resource usage logging functionality. Supports namespaces, colors, and options, as well as LogModules for external classes to hook into the logging system. Includes basic Logger, PerformanceLogger, and BufferedLogger.",
 	"type": "module",
 	"main": "dist/index.js",
@@ -16,13 +16,13 @@
 		"logging",
 		"logger"
 	],
-	"homepage": "https://github.com/rw3iss/get-loggers#readme",
+	"homepage": "https://github.com/rw3iss/get-logger#readme",
 	"bugs": {
-		"url": "https://github.com/rw3iss/get-loggers/issues"
+		"url": "https://github.com/rw3iss/get-logger/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/rw3iss/get-loggers.git"
+		"url": "git+https://github.com/rw3iss/get-logger.git"
 	},
 	"author": {
 		"name": "Ryan Weiss",
