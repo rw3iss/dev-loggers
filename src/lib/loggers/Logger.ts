@@ -29,27 +29,27 @@ export class Logger {
 		};
 	}
 
-	log(...args: any[]): this {
+	public log = (...args: any[]): this => {
 		log(this.opts.namespace, ...this.applyFormatting(args));
 		return this;
 	}
 
-	warn(...args: any[]): this {
+	public warn = (...args: any[]): this => {
 		warn(this.opts.namespace, ...this.applyFormatting(args));
 		return this;
 	}
 
-	error(...args: any[]): this {
+	public error = (...args: any[]): this => {
 		error(this.opts.namespace, ...this.applyFormatting(args));
 		return this;
 	}
 
-	setEnabled(enabled: boolean): this {
+	public setEnabled = (enabled: boolean): this => {
 		this.opts.enabled = enabled;
 		return this;
 	}
 
-	protected applyFormatting(args: any[]): any[] {
+	protected applyFormatting = (args: any[]): any[] => {
 		if (!this.opts.prefix && !this.opts.postfix) return args;
 
 		const formatted = [...args];

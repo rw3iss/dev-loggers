@@ -7,6 +7,8 @@ import { LogEvent } from './LogEvent.js';
 import { LoggerRegistry } from './LoggerRegistry.js';
 import { LogModule } from './LogModule.js';
 
+const registry = getLoggerRegistry();
+
 // ============================================================================
 // LOGGER FACTORY FUNCTIONS
 // ============================================================================
@@ -14,8 +16,6 @@ import { LogModule } from './LogModule.js';
 export function getLoggerRegistry() {
 	return LoggerRegistry.getInstance();
 }
-
-const registry = getLoggerRegistry();
 
 export function getLogger(namespace: string, opts: Partial<LoggerOptions> = {}): Logger {
 	if (!namespace) throw new Error('Must supply a namespace as first argument to getLogger');
@@ -129,7 +129,7 @@ export function error(namespaceOrFirstArg: string, ...args: any[]): void {
 	emitLog(namespace, finalArgs);
 }
 
-export function printLogs(): void {
+export function printLogCounts(): void {
 	registry.getAllLoggers().forEach(logger => {
 		if (logger instanceof PerformanceLogger) {
 			logger.printCounts();
@@ -169,4 +169,13 @@ function getCallStack(): string {
 		.split('\n')
 		.filter((line: string) => !excludeKeywords.some(keyword => line.includes(keyword)))
 		.join('\n');
+}
+
+export const executePromisesSequentially = async (promises: (() => Promise<any>)[]): Promise<any[]> => {
+  const results: any[] = [];
+  for (const promiseFactory of promises) {
+    const result = await promiseFactory(); // Await each promise before proceeding
+    results.push(result);
+  }
+  return results;
 }

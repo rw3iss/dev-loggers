@@ -4,13 +4,13 @@ import { PerformanceLogger } from './loggers/PerformanceLogger.js';
 import { BufferedLogger } from './loggers/BufferedLogger.js';
 import { Colors } from './colors.js';
 import { LoggerRegistry } from './LoggerRegistry.js';
+const registry = getLoggerRegistry();
 // ============================================================================
 // LOGGER FACTORY FUNCTIONS
 // ============================================================================
 export function getLoggerRegistry() {
     return LoggerRegistry.getInstance();
 }
-const registry = getLoggerRegistry();
 export function getLogger(namespace, opts = {}) {
     if (!namespace)
         throw new Error('Must supply a namespace as first argument to getLogger');
@@ -92,7 +92,7 @@ export function error(namespaceOrFirstArg, ...args) {
         : [prefix, ...logArgs];
     emitLog(namespace, finalArgs);
 }
-export function printLogs() {
+export function printLogCounts() {
     registry.getAllLoggers().forEach(logger => {
         if (logger instanceof PerformanceLogger) {
             logger.printCounts();
@@ -126,3 +126,11 @@ function getCallStack() {
         .filter((line) => !excludeKeywords.some(keyword => line.includes(keyword)))
         .join('\n');
 }
+export const executePromisesSequentially = async (promises) => {
+    const results = [];
+    for (const promiseFactory of promises) {
+        const result = await promiseFactory(); // Await each promise before proceeding
+        results.push(result);
+    }
+    return results;
+};

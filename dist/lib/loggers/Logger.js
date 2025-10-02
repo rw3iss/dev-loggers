@@ -16,23 +16,23 @@ export class Logger {
             namespace: namespace || opts.namespace || ''
         };
     }
-    log(...args) {
+    log = (...args) => {
         log(this.opts.namespace, ...this.applyFormatting(args));
         return this;
-    }
-    warn(...args) {
+    };
+    warn = (...args) => {
         warn(this.opts.namespace, ...this.applyFormatting(args));
         return this;
-    }
-    error(...args) {
+    };
+    error = (...args) => {
         error(this.opts.namespace, ...this.applyFormatting(args));
         return this;
-    }
-    setEnabled(enabled) {
+    };
+    setEnabled = (enabled) => {
         this.opts.enabled = enabled;
         return this;
-    }
-    applyFormatting(args) {
+    };
+    applyFormatting = (args) => {
         if (!this.opts.prefix && !this.opts.postfix)
             return args;
         const formatted = [...args];
@@ -41,5 +41,5 @@ export class Logger {
         if (this.opts.postfix)
             formatted.push(this.opts.postfix);
         return formatted;
-    }
+    };
 }

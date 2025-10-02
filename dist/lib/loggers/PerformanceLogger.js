@@ -2,10 +2,11 @@ import { DEFAULT_LOGGER_OPTIONS, Logger } from './Logger.js';
 import { log } from '../utils.js';
 const DEFAULT_PERFORMANCE_LOGGER_OPTIONS = {
     ...DEFAULT_LOGGER_OPTIONS,
-    logCounts: true
+    logCounts: true,
+    showIds: true
 };
 export class PerformanceLogger extends Logger {
-    opts;
+    //public opts: Required<PerformanceLoggerOptions>;
     counts = new Map();
     times = new Map();
     constructor(namespace, opts = {}) {
@@ -16,7 +17,7 @@ export class PerformanceLogger extends Logger {
             ...opts
         };
     }
-    log(...args) {
+    log = (...args) => {
         if (args.length === 0)
             return this;
         const id = String(args[0]);
@@ -28,22 +29,22 @@ export class PerformanceLogger extends Logger {
             : formattedArgs;
         log(this.opts.namespace, ...finalArgs);
         return this;
-    }
-    logIncr(...args) {
+    };
+    logIncr = (...args) => {
         if (args.length === 0)
             return this;
         const id = String(args[0]);
         this.incrementCount(id);
         log(this.opts.namespace, ...this.applyFormatting(args));
         return this;
-    }
-    incr(id) {
+    };
+    incr = (id) => {
         return this.incrementCount(id);
-    }
-    time(id) {
+    };
+    time = (id) => {
         return this.recordTime(id);
-    }
-    printCounts() {
+    };
+    printCounts = () => {
         const entries = Array.from(this.counts.entries())
             .sort((a, b) => b[1] - a[1]); // Sort by count descending
         const lines = [
@@ -54,12 +55,12 @@ export class PerformanceLogger extends Logger {
         ];
         log(this.opts.namespace, lines.join('\n'));
         return this;
-    }
-    reset() {
+    };
+    reset = () => {
         this.counts.clear();
         this.times.clear();
         return this;
-    }
+    };
     incrementCount(id) {
         const count = (this.counts.get(id) || 0) + 1;
         this.counts.set(id, count);

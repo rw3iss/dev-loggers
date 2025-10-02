@@ -1,11 +1,12 @@
 import { DEFAULT_LOGGER_OPTIONS, Logger } from './Logger.js';
 import { log } from '../utils.js';
+const DEFAULT_MAX_BUFFER_SIZE = 1000;
 const DEFAULT_BUFFERED_LOGGER_OPTIONS = {
     ...DEFAULT_LOGGER_OPTIONS,
-    maxBufferSize: 1000
+    maxBufferSize: DEFAULT_MAX_BUFFER_SIZE
 };
 export class BufferedLogger extends Logger {
-    opts;
+    //private opts: Required<BufferedLoggerOptions> = DEFAULT_BUFFERED_LOGGER_OPTIONS;
     buffer = [];
     constructor(namespace, opts = {}) {
         super(namespace, opts);
@@ -15,24 +16,25 @@ export class BufferedLogger extends Logger {
             ...opts
         };
     }
-    log(...args) {
-        if (this.buffer.length >= this.opts.maxBufferSize) {
+    log = (...args) => {
+        const opts = this.opts;
+        if (this.buffer.length >= (opts?.maxBufferSize || DEFAULT_MAX_BUFFER_SIZE)) {
             this.warn('Buffer overflow: flushing automatically');
             this.flush();
         }
         this.buffer.push(args);
         return this;
-    }
-    flush() {
+    };
+    flush = () => {
         this.buffer.forEach(args => log(this.opts.namespace, ...args));
         this.buffer = [];
         return this;
-    }
-    clear() {
+    };
+    clear = () => {
         this.buffer = [];
         return this;
-    }
-    getBufferSize() {
+    };
+    getBufferSize = () => {
         return this.buffer.length;
-    }
+    };
 }

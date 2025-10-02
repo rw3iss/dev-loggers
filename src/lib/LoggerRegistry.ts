@@ -11,10 +11,6 @@ export class LoggerRegistry {
 	private logAllMode = false;
 	private logOnlyNamespaces?: Set<string>;
 
-	constructor() {
-		console.log(`NEW LoggerRegistry()`)
-	}
-
 	static getInstance() {
 		if (!LoggerRegistry.instance) {
 			LoggerRegistry.instance = new LoggerRegistry();

@@ -3,15 +3,17 @@ import { log, warn, error } from '../utils.js';
 
 export interface PerformanceLoggerOptions extends LoggerOptions {
 	logCounts?: boolean;
+	showIds?: boolean;
 }
 
 const DEFAULT_PERFORMANCE_LOGGER_OPTIONS: Required<PerformanceLoggerOptions> = {
 	...DEFAULT_LOGGER_OPTIONS,
-	logCounts: true
+	logCounts: true,
+	showIds: true
 };
 
 export class PerformanceLogger extends Logger {
-	public opts: Required<PerformanceLoggerOptions>;
+	//public opts: Required<PerformanceLoggerOptions>;
 	private counts = new Map<string, number>();
 	private times = new Map<string, number>();
 
@@ -24,7 +26,7 @@ export class PerformanceLogger extends Logger {
 		};
 	}
 
-	log(...args: any[]): this {
+	public log = (...args: any[]): this => {
 		if (args.length === 0) return this;
 
 		const id = String(args[0]);
@@ -40,7 +42,7 @@ export class PerformanceLogger extends Logger {
 		return this;
 	}
 
-	logIncr(...args: any[]): this {
+	public logIncr = (...args: any[]): this => {
 		if (args.length === 0) return this;
 		const id = String(args[0]);
 		this.incrementCount(id);
@@ -48,15 +50,15 @@ export class PerformanceLogger extends Logger {
 		return this;
 	}
 
-	incr(id: string): number {
+	public incr = (id: string): number => {
 		return this.incrementCount(id);
 	}
 
-	time(id: string): number | undefined {
+	public time = (id: string): number | undefined => {
 		return this.recordTime(id);
 	}
 
-	printCounts(): this {
+	public printCounts = (): this => {
 		const entries = Array.from(this.counts.entries())
 			.sort((a, b) => b[1] - a[1]); // Sort by count descending
 
@@ -71,7 +73,7 @@ export class PerformanceLogger extends Logger {
 		return this;
 	}
 
-	reset(): this {
+	public reset = (): this => {
 		this.counts.clear();
 		this.times.clear();
 		return this;

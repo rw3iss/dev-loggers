@@ -1,4 +1,4 @@
-import { printLogs, setLogAllMode } from './lib/utils.js';
+import { printLogCounts, setLogAllMode } from './lib/utils.js';
 import { LoggerRegistry } from './lib/LoggerRegistry.js';
 
 // ============================================================================
@@ -9,7 +9,7 @@ import { LoggerRegistry } from './lib/LoggerRegistry.js';
 // Expose to global for debugging (browser/Node.js compatible)
 if (typeof globalThis !== 'undefined') {
 	(globalThis as any).loggers = LoggerRegistry.getInstance();
-	(globalThis as any).printLogs = printLogs;
+	(globalThis as any).printLogCounts = printLogCounts;
 	(globalThis as any).setLogAllMode = setLogAllMode;
 }
 

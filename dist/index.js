@@ -1,4 +1,4 @@
-import { printLogs, setLogAllMode } from './lib/utils.js';
+import { printLogCounts, setLogAllMode } from './lib/utils.js';
 import { LoggerRegistry } from './lib/LoggerRegistry.js';
 // ============================================================================
 // CONFIGURATION
@@ -6,7 +6,7 @@ import { LoggerRegistry } from './lib/LoggerRegistry.js';
 // Expose to global for debugging (browser/Node.js compatible)
 if (typeof globalThis !== 'undefined') {
     globalThis.loggers = LoggerRegistry.getInstance();
-    globalThis.printLogs = printLogs;
+    globalThis.printLogCounts = printLogCounts;
     globalThis.setLogAllMode = setLogAllMode;
 }
 // Export types for clients:

@@ -1,117 +1,194 @@
-# get-loggers
+# get-logger
 
-Minimal < 500 lines, no dependency, and flexible application logging system. Loggers are created by namespace and maintain app-wide singleton instances for care towards resource awareness. Focus on deconstruction, extension, and minimalism for barebones/simple client usage.
+A minimal, zero-dependency logging library with namespace-based singleton instances, color support, and three specialized logger types. Built for simplicity and resource efficiency.
 
 ## Installation
-Pick one:
-```
-yarn add get-loggers
-pnpm install get-loggers
-npm install get-loggers
+
+```bash
+npm install get-logger
 ```
 
-## Usage
+## Quick Start
 
+Import the logger factory functions for the type of logger you need:
 
-/**
- * Minimal no-dependency logging framework
- *
- * Provides three logger types:
- * - Logger: Basic logging with namespacing and configuration
- * - PerformanceLogger: Tracks time between log statements with the same ID
- * - BufferedLogger: Accumulates logs until flush() is called
- *
- * @example
- * ```typescript
- * import { getLogger, getPerformanceLogger, getBufferedLogger } from './logging';
- *
- * // Basic logger
- * const { log, warn, error } = getLogger('MyApp');
- * log('Application started');
- *
- * // Performance logger
- * const perfLog = getPerformanceLogger('Performance');
- * perfLog.log('operation-1', 'Starting operation');
- * perfLog.log('operation-1', 'Operation complete'); // Shows elapsed time
- *
- * // Buffered logger
- * const buffered = getBufferedLogger('Batch');
- * buffered.log('Message 1');
- * buffered.log('Message 2');
- * buffered.flush(); // Outputs all at once
- * ```
- */
-
-
-Import the method for whichever type of logger you want to use:
-```
-import { getLogger, getPerformanceLogger, getBufferedLogger } from 'llogg';
-```
-You can also just import the log methods without using namespaced instances:
-```
-import { log, warn, error } from 'llogg';
+```typescript
+import { getLogger, getPerformanceLogger, getBufferedLogger } from 'get-logger';
 ```
 
-### Logger:
-Basic logging with namespacing, coloring, and options (see below for more options). Call at the top of your file:
+## Logger Types
 
-```
-const { log, warn, error } = getLogger('SomeName');
-log('a', 'message', someData); 		// prints "SomeName: a message {...}"
-```
+### 1. Logger (Basic)
 
-Extended options:
-```
-const { log, warn, error } = getLogger('SomeName', { enabled: false, color: 'red', prefix: '[P]' });
-```
-### PerformanceLogger:
-Extends Logger and prints time between statements with the same ID (first argument).
-```
-const { log } = getPerformanceLogger('[P] Profiling');
-log('ID', 'some', 'messages')
-log('ID', 'other', stuff) 		// prints 'ID <msgs> (#ms)' (time since msg last received with same ID)
+Standard logging with namespacing, colors, and customization options. Perfect for general application logging.
+
+```typescript
+import { getLogger } from 'get-logger';
+
+const { log, warn, error } = getLogger('MyApp');
+
+log('Application started');
+warn('Low memory warning');
+error('Connection failed');
 ```
 
-### BufferedLogger:
-Extends Logger and stores logs until .flush() is called, then printing them all at once.
+**Output:**
 ```
-const { log, flush } = getBufferedLogger('Buffmenow');
-log('log msg')  		// wont show yet
-log('another msg') 		// wont show yet
-flush();				// shows all messages at once
+MyApp: Application started
+MyApp: ⚠️ Warning: Low memory warning
+MyApp: 🛑 Error! Connection failed
 ```
 
-## LogModules
-Register external classes which have an onLog handler, and receive all log events for custom operations.
+### 2. PerformanceLogger
+
+Extends Logger to measure and display time elapsed between log calls with the same ID. Ideal for profiling and performance monitoring.
+
+```typescript
+import { getPerformanceLogger } from 'get-logger';
+
+const { log  } = getPerformanceLogger('Performance');
+
+log('(render)', 'Starting render');
+// ... do work ...
+log('(render)', 'Render complete');  // Shows elapsed time
 ```
-// Your custom class just needs to implement onLog:
-export class DebugPanelLogModule implements LogModule {
-	public onLog(log: LogEvent) {
-		this.debugPanel.addLog(log.namespace, log.args);
-	}
+
+**Output:**
+```
+Performance: (render) Starting render
+Performance: (render) Render complete (142ms)
+```
+
+**Additional Methods:**
+- `printCounts()` - Display call count statistics for all IDs
+- `reset()` - Clear all performance data
+- `time(id)` - Get elapsed time for an ID
+- `incr(id)` - Increment counter for an ID
+
+### 3. BufferedLogger
+
+Extends Logger to accumulate log messages and output them all at once. Useful for batch operations or conditional logging.
+
+```typescript
+import { getBufferedLogger } from 'get-logger';
+
+const { log, flush } = getBufferedLogger('Batch');
+
+log('Processing item 1');
+log('Processing item 2');
+log('Processing item 3');
+
+flush();  // Outputs all buffered messages
+```
+
+**Additional Methods:**
+- `flush()` - Output all buffered messages and clear buffer
+- `clear()` - Clear buffer without outputting
+- `getBufferSize()` - Get current buffer size
+
+## Customization
+
+### Logger Options
+
+All logger types accept an options object as the second parameter:
+
+```typescript
+const logger = getLogger('MyApp', {
+  color: 'cyan',           // Namespace color
+  enabled: true,           // Enable/disable logging
+  prefix: '[DEBUG]',       // Text before each message
+  postfix: '✓'             // Text after each message
+});
+```
+
+**Available Options:**
+- `color` - Color for the namespace (cyan, red, green, yellow, blue, magenta, white)
+- `enabled` - Enable or disable this logger
+- `prefix` - String to prepend to all messages
+- `postfix` - String to append to all messages
+
+### PerformanceLogger Options
+
+```typescript
+const perfLogger = getPerformanceLogger('Perf', {
+  logCounts: true,    // Track call counts
+  showIds: true       // Show IDs in output
+});
+```
+
+### BufferedLogger Options
+
+```typescript
+const bufLogger = getBufferedLogger('Buffer', {
+  maxBufferSize: 500  // Auto-flush when buffer exceeds this size
+});
+```
+
+## Standalone Functions
+
+You can use standalone logging functions without creating logger instances:
+
+```typescript
+import { log, warn, error } from 'get-logger';
+
+log('Simple message');
+warn('Warning message');
+error('Error message');
+```
+
+## Advanced Features
+
+### LogModules - Custom Log Handlers
+
+Register external classes to receive all log events for custom processing (e.g., sending to external services, UI panels, etc.):
+
+```typescript
+import { addLogModule } from 'get-logger';
+import { LogModule, LogEvent } from 'get-logger';
+
+class CustomLogHandler implements LogModule {
+  onLog(event: LogEvent) {
+    // event.namespace - the logger's namespace
+    // event.args - the log arguments
+    this.sendToExternalService(event);
+  }
 }
+
+addLogModule(new CustomLogHandler());
 ```
 
-Register the custom LogModule class with the logging system:
-```
-import { addLogModule } from 'get-loggers';
-addLogModule(new DebugPanelLogModule());
+### Global Controls
+
+```typescript
+import { setLogAllMode, printLogCounts } from 'get-logger';
+
+// Enable/disable all loggers
+setLogAllMode(true);
+
+// Enable only specific namespaces
+setLogAllMode(true, ['MyApp', 'Database']);
+
+// Print performance statistics for all PerformanceLoggers
+printLogCounts();
 ```
 
-## Logger Options:
-```
-export type LoggerOptions = {
-	namespace?: string;
-	color?: string;
-	enabled?: boolean;
-	prefix?: string;
-	postfix?: string;
-};
+### Singleton Pattern
+
+Loggers are singleton instances per namespace. Calling `getLogger('MyApp')` multiple times returns the same instance:
+
+```typescript
+// file1.ts
+const logger = getLogger('MyApp');
+
+// file2.ts
+const logger = getLogger('MyApp'); // Same instance as file1.ts
 ```
 
-## Custom Output
-All loggers output to console.log, but this can be changed by importing and calling setLogOutput(output):
-```
-import { setLogOutput } from 'get-loggers';
-setLogOutput(someOtherStream);
-```
+## Configuration
+
+The library respects these environment-level configurations (defined in [config.ts](src/lib/config.ts)):
+
+- `COLORS_ENABLED` - Enable/disable color output
+- `ALWAYS_LOG_WARNINGS` - Log warnings even when logger is disabled
+- `ALWAYS_LOG_ERRORS` - Log errors even when logger is disabled
+- `LOG_ERROR_TRACES` - Include stack traces in error logs

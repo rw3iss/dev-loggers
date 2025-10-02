@@ -5,14 +5,15 @@ export interface BufferedLoggerOptions extends LoggerOptions {
 	maxBufferSize?: number;
 }
 
+const DEFAULT_MAX_BUFFER_SIZE = 1000;
 const DEFAULT_BUFFERED_LOGGER_OPTIONS: Required<BufferedLoggerOptions> = {
 	...DEFAULT_LOGGER_OPTIONS,
-	maxBufferSize: 1000
+	maxBufferSize: DEFAULT_MAX_BUFFER_SIZE
 };
 
 
 export class BufferedLogger extends Logger {
-	public opts: Required<BufferedLoggerOptions>;
+	//private opts: Required<BufferedLoggerOptions> = DEFAULT_BUFFERED_LOGGER_OPTIONS;
 	private buffer: any[][] = [];
 
 	constructor(namespace: string, opts: Partial<BufferedLoggerOptions> = {}) {
@@ -24,8 +25,9 @@ export class BufferedLogger extends Logger {
 		};
 	}
 
-	log(...args: any[]): this {
-		if (this.buffer.length >= this.opts.maxBufferSize) {
+	public log = (...args: any[]): this => {
+		const opts = this.opts as BufferedLoggerOptions;
+		if (this.buffer.length >= (opts?.maxBufferSize || DEFAULT_MAX_BUFFER_SIZE)) {
 			this.warn('Buffer overflow: flushing automatically');
 			this.flush();
 		}
@@ -33,18 +35,18 @@ export class BufferedLogger extends Logger {
 		return this;
 	}
 
-	flush(): this {
+	public flush = (): this => {
 		this.buffer.forEach(args => log(this.opts.namespace, ...args));
 		this.buffer = [];
 		return this;
 	}
 
-	clear(): this {
+	public clear = (): this => {
 		this.buffer = [];
 		return this;
 	}
 
-	getBufferSize(): number {
+	public getBufferSize = (): number => {
 		return this.buffer.length;
 	}
 }

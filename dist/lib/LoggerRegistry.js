@@ -5,9 +5,6 @@ export class LoggerRegistry {
     modules = [];
     logAllMode = false;
     logOnlyNamespaces;
-    constructor() {
-        console.log(`NEW LoggerRegistry()`);
-    }
     static getInstance() {
         if (!LoggerRegistry.instance) {
             LoggerRegistry.instance = new LoggerRegistry();

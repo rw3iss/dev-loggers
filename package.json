@@ -1,7 +1,17 @@
 {
-	"name": "get-loggers",
+	"name": "get-logger",
 	"version": "1.1.4",
-	"description": "Minimal logging functionality in < 500 lines. Supports namespaces, colors, and options, as well as LogModules for external classes to hook into the logging system. Includes basic Logger, PerformanceLogger, and BufferedLogger. Focus on minimalism for simple client usage.",
+	"description": "Minimal API and resource usage logging functionality. Supports namespaces, colors, and options, as well as LogModules for external classes to hook into the logging system. Includes basic Logger, PerformanceLogger, and BufferedLogger.",
+	"type": "module",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "tsc",
+		"test": "node tests/index.ts"
+	},
+	"devDependencies": {
+		"@types/node": "^24.6.1",
+		"typescript": "^5.9.3"
+	},
 	"keywords": [
 		"logging",
 		"logger"
@@ -19,15 +29,5 @@
 		"email": "rw3iss@gmail.com",
 		"url": "https://www.ryanweiss.net"
 	},
-	"license": "ISC",
-	"type": "module",
-	"main": "dist/index.js",
-	"scripts": {
-		"build": "tsc",
-		"test": "node tests/test.ts"
-	},
-	"devDependencies": {
-		"@types/node": "^24.6.1",
-		"typescript": "^5.9.3"
-	}
+	"license": "ISC"
 }
