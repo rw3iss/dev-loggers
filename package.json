@@ -1,6 +1,6 @@
 {
 	"name": "get-loggers",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "Minimal logging functionality in < 500 lines. Supports namespaces, colors, and options, as well as LogModules for external classes to hook into the logging system. Includes basic Logger, PerformanceLogger, and BufferedLogger. Focus on minimalism for simple client usage.",
 	"keywords": [
 		"logging",
