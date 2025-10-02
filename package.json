@@ -23,7 +23,8 @@
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "tsc"
+		"build": "tsc",
+		"test": "node tests/test.ts"
 	},
 	"devDependencies": {
 		"@types/node": "^24.6.1",

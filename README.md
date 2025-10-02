@@ -11,9 +11,45 @@ npm install get-loggers
 ```
 
 ## Usage
-Import the method for whichever logger you want:
+
+
+/**
+ * Minimal no-dependency logging framework
+ *
+ * Provides three logger types:
+ * - Logger: Basic logging with namespacing and configuration
+ * - PerformanceLogger: Tracks time between log statements with the same ID
+ * - BufferedLogger: Accumulates logs until flush() is called
+ *
+ * @example
+ * ```typescript
+ * import { getLogger, getPerformanceLogger, getBufferedLogger } from './logging';
+ *
+ * // Basic logger
+ * const { log, warn, error } = getLogger('MyApp');
+ * log('Application started');
+ *
+ * // Performance logger
+ * const perfLog = getPerformanceLogger('Performance');
+ * perfLog.log('operation-1', 'Starting operation');
+ * perfLog.log('operation-1', 'Operation complete'); // Shows elapsed time
+ *
+ * // Buffered logger
+ * const buffered = getBufferedLogger('Batch');
+ * buffered.log('Message 1');
+ * buffered.log('Message 2');
+ * buffered.flush(); // Outputs all at once
+ * ```
+ */
+
+
+Import the method for whichever type of logger you want to use:
 ```
-import { getLogger, getPerformanceLogger, getBufferedLogger } from 'get-loggers';
+import { getLogger, getPerformanceLogger, getBufferedLogger } from 'llogg';
+```
+You can also just import the log methods without using namespaced instances:
+```
+import { log, warn, error } from 'llogg';
 ```
 
 ### Logger:

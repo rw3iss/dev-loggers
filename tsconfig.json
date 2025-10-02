@@ -1,35 +1,23 @@
 {
 	"compilerOptions": {
-		"module": "nodenext",
+		"moduleResolution": "Bundler",
+		"target": "ESNext", // Or your desired target
+		"module": "ESNext", // Or your desired module system
 		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"target": "es6",
-		"noImplicitAny": false,
-		"moduleResolution": "nodenext",
-		"sourceMap": true,
 		"outDir": "dist",
 		"baseUrl": ".",
-		"allowJs": true,
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"preserveConstEnums": true,
-		"forceConsistentCasingInFileNames": true,
-		"strictNullChecks": true,
+   		"rootDir": "./src",
+		"emitDecoratorMetadata": false,
+		"strictNullChecks": true, // this allows overriding of existing base class members without errors?
+    	"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
 		"paths": {},
-		"lib": [
-			"ES2022",
-			"dom",
-			"dom.iterable"
-		],
 		"strict": false,
-		"preserveWatchOutput": true
+		"lib": [
+			"ESNext",
+			"dom"
+		],
 	},
-	"include": [
-		"src"
-	],
-	"exclude": [
-		"dist",
-		"node_modules"
-	]
+	"include": ["src/**/*.ts"], // Or your desired file inclusion pattern
+ 	"exclude": ["node_modules"]
 }
