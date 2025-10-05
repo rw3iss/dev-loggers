@@ -1,6 +1,10 @@
 # dev-loggers
 
-A minimal, zero-dependency logging library with namespace-based singleton instances, color support, and three specialized logger types. Built for simplicity and resource efficiency.
+Minimal, zero-dependency logging library.
+* Namespace-based, singleton instances
+* <span style="color: #0a95f9ff;">Colorization</span>, as well as prefix and postfix options.
+* Three types of Loggers: Logger, PerformanceLogger, BufferedLogger
+* Simple mplicity and resource efficiency
 
 ## Installation
 
@@ -10,10 +14,16 @@ npm install dev-loggers
 
 ## Quick Start
 
-Import the logger factory functions for the type of logger you need:
+Import the logger factory functions for the type of logger you need, and retrieve an instance using a namespace as first argument.
+
+All loggers with the same namespace use the same global instance of that logger across all files.
 
 ```typescript
 import { getLogger, getPerformanceLogger, getBufferedLogger } from 'dev-loggers';
+
+const { log, error, warn } = getLogger('MyService');
+
+log('message')
 ```
 
 ## Logger Types
