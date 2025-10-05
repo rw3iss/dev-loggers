@@ -1,11 +1,11 @@
-# logabit
+# dev-loggers
 
 A minimal, zero-dependency logging library with namespace-based singleton instances, color support, and three specialized logger types. Built for simplicity and resource efficiency.
 
 ## Installation
 
 ```bash
-npm install get-loggers
+npm install dev-loggers
 ```
 
 ## Quick Start
@@ -13,7 +13,7 @@ npm install get-loggers
 Import the logger factory functions for the type of logger you need:
 
 ```typescript
-import { getLogger, getPerformanceLogger, getBufferedLogger } from 'get-loggers';
+import { getLogger, getPerformanceLogger, getBufferedLogger } from 'dev-loggers';
 ```
 
 ## Logger Types
@@ -23,7 +23,7 @@ import { getLogger, getPerformanceLogger, getBufferedLogger } from 'get-loggers'
 Standard logging with namespacing, colors, and customization options. Perfect for general application logging.
 
 ```typescript
-import { getLogger } from 'get-loggers';
+import { getLogger } from 'dev-loggers';
 
 const { log, warn, error } = getLogger('MyApp');
 
@@ -44,7 +44,7 @@ MyApp: 🛑 Error! Connection failed
 Extends Logger to measure and display time elapsed between log calls with the same ID. Ideal for profiling and performance monitoring.
 
 ```typescript
-import { getPerformanceLogger } from 'get-loggers';
+import { getPerformanceLogger } from 'dev-loggers';
 
 const { log  } = getPerformanceLogger('Performance');
 
@@ -70,7 +70,7 @@ Performance: (render) Render complete (142ms)
 Extends Logger to accumulate log messages and output them all at once. Useful for batch operations or conditional logging.
 
 ```typescript
-import { getBufferedLogger } from 'get-loggers';
+import { getBufferedLogger } from 'dev-loggers';
 
 const { log, flush } = getBufferedLogger('Batch');
 
@@ -129,7 +129,7 @@ const bufLogger = getBufferedLogger('Buffer', {
 You can use standalone logging functions without creating logger instances:
 
 ```typescript
-import { log, warn, error } from 'get-loggers';
+import { log, warn, error } from 'dev-loggers';
 
 log('Simple message');
 warn('Warning message');
@@ -143,8 +143,8 @@ error('Error message');
 Register external classes to receive all log events for custom processing (e.g., sending to external services, UI panels, etc.):
 
 ```typescript
-import { addLogModule } from 'get-loggers';
-import { LogModule, LogEvent } from 'get-loggers';
+import { addLogModule } from 'dev-loggers';
+import { LogModule, LogEvent } from 'dev-loggers';
 
 class CustomLogHandler implements LogModule {
   onLog(event: LogEvent) {
@@ -160,7 +160,7 @@ addLogModule(new CustomLogHandler());
 ### Global Controls
 
 ```typescript
-import { setLogAllMode, printLogCounts } from 'get-loggers';
+import { setLogAllMode, printLogCounts } from 'dev-loggers';
 
 // Enable/disable all loggers
 setLogAllMode(true);
