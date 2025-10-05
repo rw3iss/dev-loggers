@@ -6,7 +6,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "tsc",
-		"test": "node tests/index.ts"
+		"test": "npm run build && node tests/index.ts"
 	},
 	"devDependencies": {
 		"@types/node": "^24.6.1",
