@@ -1,9 +1,8 @@
 import { log, warn, error } from '../utils.js';
-import { DEFAULT_LOG_COLOR } from '../config.js';
 export const DEFAULT_LOGGER_OPTIONS = {
     namespace: '',
-    color: DEFAULT_LOG_COLOR,
     enabled: true,
+    color: '',
     prefix: '',
     postfix: ''
 };

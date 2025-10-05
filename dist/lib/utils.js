@@ -51,10 +51,9 @@ export function addLogModule(module) {
 // CORE LOGGING FUNCTIONS
 // ============================================================================
 export function log(namespaceOrFirstArg, ...args) {
-    const hasNamespace = typeof namespaceOrFirstArg === 'string' && registry.getLogger(namespaceOrFirstArg);
-    const namespace = hasNamespace ? namespaceOrFirstArg : '';
-    const logArgs = hasNamespace ? args : [namespaceOrFirstArg, ...args];
-    const logger = namespace ? registry.getLogger(namespace) : null;
+    const logger = typeof namespaceOrFirstArg === 'string' ? registry.getLogger(namespaceOrFirstArg) : null;
+    const namespace = logger ? namespaceOrFirstArg : '';
+    const logArgs = logger ? args : [namespaceOrFirstArg, ...args];
     if (logger && !registry.shouldLog(namespace, logger.opts.enabled)) {
         return;
     }
@@ -64,10 +63,9 @@ export function log(namespaceOrFirstArg, ...args) {
     emitLog(namespace, formattedArgs);
 }
 export function warn(namespaceOrFirstArg, ...args) {
-    const hasNamespace = typeof namespaceOrFirstArg === 'string' && registry.getLogger(namespaceOrFirstArg);
-    const namespace = hasNamespace ? namespaceOrFirstArg : '';
-    const logArgs = hasNamespace ? args : [namespaceOrFirstArg, ...args];
-    const logger = namespace ? registry.getLogger(namespace) : null;
+    const logger = typeof namespaceOrFirstArg === 'string' ? registry.getLogger(namespaceOrFirstArg) : null;
+    const namespace = logger ? namespaceOrFirstArg : '';
+    const logArgs = logger ? args : [namespaceOrFirstArg, ...args];
     if (logger && !ALWAYS_LOG_WARNINGS && !registry.shouldLog(namespace, logger.opts.enabled)) {
         return;
     }
@@ -77,10 +75,9 @@ export function warn(namespaceOrFirstArg, ...args) {
     emitLog(namespace, [prefix, ...logArgs]);
 }
 export function error(namespaceOrFirstArg, ...args) {
-    const hasNamespace = typeof namespaceOrFirstArg === 'string' && registry.getLogger(namespaceOrFirstArg);
-    const namespace = hasNamespace ? namespaceOrFirstArg : '';
-    const logArgs = hasNamespace ? args : [namespaceOrFirstArg, ...args];
-    const logger = namespace ? registry.getLogger(namespace) : null;
+    const logger = typeof namespaceOrFirstArg === 'string' ? registry.getLogger(namespaceOrFirstArg) : null;
+    const namespace = logger ? namespaceOrFirstArg : '';
+    const logArgs = logger ? args : [namespaceOrFirstArg, ...args];
     if (logger && !ALWAYS_LOG_ERRORS && !registry.shouldLog(namespace, logger.opts.enabled)) {
         return;
     }

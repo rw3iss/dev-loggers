@@ -1,10 +1,9 @@
 # dev-loggers
 
 Minimal, zero-dependency logging library.
-* Namespace-based, singleton instances
-* <span style="color: #0a95f9ff;">Colorization</span>, as well as prefix and postfix options.
-* Three types of Loggers: Logger, PerformanceLogger, BufferedLogger
-* Simple mplicity and resource efficiency
+* Global singleton instances (namespaces)
+* Support for <span style="color: #3f80f8ff;">colorization</span> and other options
+* Logger, PerformanceLogger, BufferedLogger
 
 ## Installation
 
@@ -16,15 +15,33 @@ npm install dev-loggers
 
 Import the logger factory functions for the type of logger you need, and retrieve an instance using a namespace as first argument.
 
-All loggers with the same namespace use the same global instance of that logger across all files.
+If using these factory functions, all loggers with the same namespace use the global instance of that logger across all files.
 
 ```typescript
+// import
 import { getLogger, getPerformanceLogger, getBufferedLogger } from 'dev-loggers';
 
+// instantiate and get methods, at the top of a file
 const { log, error, warn } = getLogger('MyService');
 
-log('message')
+// outputs to console "MyService: message"
+log('message');
+
+// disable or set a color for the logger:
+const { log } = getLogger('MyService', { enabled: false, color: 'blue' });
 ```
+<b>Note:</b> If you call getLogger('namespace') with the same namespace in multiple files, it will use the same instance, but with the last configured options (if they happen to differ).
+
+
+You can also instantiate a Logger instance directly, and calling the log methods on it. However note that these will not be managed by the LoggerRegister, and therefore not be singleton instances.
+```typescript
+import { Logger } from 'dev-loggers';
+
+const logger = new Logger(); // namespace is optional
+
+logger.log('message');
+```
+
 
 ## Logger Types
 
@@ -56,7 +73,7 @@ Extends Logger to measure and display time elapsed between log calls with the sa
 ```typescript
 import { getPerformanceLogger } from 'dev-loggers';
 
-const { log  } = getPerformanceLogger('Performance');
+const { log } = getPerformanceLogger('Performance');
 
 log('(render)', 'Starting render');
 // ... do work ...
@@ -136,7 +153,7 @@ const bufLogger = getBufferedLogger('Buffer', {
 
 ## Standalone Functions
 
-You can use standalone logging functions without creating logger instances:
+You can use simple standalone logging functions without creating logger instances, which will just format and log to the console:
 
 ```typescript
 import { log, warn, error } from 'dev-loggers';
@@ -182,23 +199,11 @@ setLogAllMode(true, ['MyApp', 'Database']);
 printLogCounts();
 ```
 
-### Singleton Pattern
-
-Loggers are singleton instances per namespace. Calling `getLogger('MyApp')` multiple times returns the same instance:
-
-```typescript
-// file1.ts
-const logger = getLogger('MyApp');
-
-// file2.ts
-const logger = getLogger('MyApp'); // Same instance as file1.ts
-```
-
 ## Configuration
 
-The library respects these environment-level configurations (defined in [config.ts](src/lib/config.ts)):
+The library respects these environment-level configurations:
 
-- `COLORS_ENABLED` - Enable/disable color output
+- `COLORS_ENABLED` - Enable/disable color output (useful to set this ENV on remote servers that don't support colors)
 - `ALWAYS_LOG_WARNINGS` - Log warnings even when logger is disabled
 - `ALWAYS_LOG_ERRORS` - Log errors even when logger is disabled
-- `LOG_ERROR_TRACES` - Include stack traces in error logs
+- `LOG_ERROR_TRACES` - Include stack traces after each error log

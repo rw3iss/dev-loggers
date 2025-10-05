@@ -1,7 +1,7 @@
 export interface LoggerOptions {
     namespace?: string;
-    color?: string;
     enabled?: boolean;
+    color?: string;
     prefix?: string;
     postfix?: string;
 }

@@ -3,16 +3,16 @@ import { DEFAULT_LOG_COLOR } from '../config.js';
 
 export interface LoggerOptions {
 	namespace?: string;
-	color?: string;
 	enabled?: boolean;
+	color?: string;
 	prefix?: string;
 	postfix?: string;
 }
 
 export const DEFAULT_LOGGER_OPTIONS: Required<LoggerOptions> = {
 	namespace: '',
-	color: DEFAULT_LOG_COLOR,
 	enabled: true,
+	color: '',
 	prefix: '',
 	postfix: ''
 };
