@@ -1,5 +1,5 @@
-import { printLogCounts, setLogAllMode } from './lib/utils.js';
 import { LoggerRegistry } from './lib/LoggerRegistry.js';
+import { printLogCounts, setLogAllMode } from './globals.js';
 
 // ============================================================================
 // CONFIGURATION
@@ -22,4 +22,4 @@ export * from './lib/LogEvent.js';
 export * from './lib/LoggerRegistry.js';
 export * from './lib/LogModule.js';
 
-export * from './lib/utils.js';
+export * from './globals.js';

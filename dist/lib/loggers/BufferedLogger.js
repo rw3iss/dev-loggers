@@ -1,5 +1,5 @@
 import { DEFAULT_LOGGER_OPTIONS, Logger } from './Logger.js';
-import { log } from '../utils.js';
+import { log } from '../../globals.js';
 const DEFAULT_MAX_BUFFER_SIZE = 1000;
 const DEFAULT_BUFFERED_LOGGER_OPTIONS = {
     ...DEFAULT_LOGGER_OPTIONS,

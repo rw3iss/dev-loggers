@@ -1,16 +1,24 @@
-import { COLORS_ENABLED, ALWAYS_LOG_WARNINGS, ALWAYS_LOG_ERRORS, LOG_ERROR_TRACES } from './config.js';
-import { Logger } from './loggers/Logger.js';
-import { PerformanceLogger } from './loggers/PerformanceLogger.js';
-import { BufferedLogger } from './loggers/BufferedLogger.js';
-import { Colors } from './colors.js';
-import { LoggerRegistry } from './LoggerRegistry.js';
-const registry = getLoggerRegistry();
+import { Logger } from './lib/loggers/Logger.js';
+import { PerformanceLogger } from './lib/loggers/PerformanceLogger.js';
+import { getLoggerRegistry, formatNamespace, getCallStack } from './utils.js';
+import { BufferedLogger } from './lib/loggers/BufferedLogger.js';
+import { ALWAYS_LOG_WARNINGS, ALWAYS_LOG_ERRORS, LOG_ERROR_TRACES } from './config.js';
+/* Global API:
+
+getLogger, getPerformanceLogger, getBufferedLogger
+
+log, warn, error
+
+addLogModule
+
+printLogCounts
+
+setLogAllMode
+
+*/
 // ============================================================================
 // LOGGER FACTORY FUNCTIONS
 // ============================================================================
-export function getLoggerRegistry() {
-    return LoggerRegistry.getInstance();
-}
 export function getLogger(namespace, opts = {}) {
     if (!namespace)
         throw new Error('Must supply a namespace as first argument to getLogger');
@@ -40,12 +48,6 @@ export function getBufferedLogger(namespace, opts = {}) {
         registry.setLogger(namespace, logger);
     }
     return logger;
-}
-// ============================================================================
-// LOG MODULES
-// ============================================================================
-export function addLogModule(module) {
-    registry.addModule(module);
 }
 // ============================================================================
 // CORE LOGGING FUNCTIONS
@@ -89,6 +91,15 @@ export function error(namespaceOrFirstArg, ...args) {
         : [prefix, ...logArgs];
     emitLog(namespace, finalArgs);
 }
+// ============================================================================
+// LOG MODULES
+// ============================================================================
+export function addLogModule(module) {
+    registry.addModule(module);
+}
+// ============================================================================
+// MISC CONTROLS
+// ============================================================================
 export function printLogCounts() {
     registry.getAllLoggers().forEach(logger => {
         if (logger instanceof PerformanceLogger) {
@@ -99,35 +110,9 @@ export function printLogCounts() {
 export function setLogAllMode(enabled, onlyNamespaces) {
     registry.setLogAllMode(enabled, onlyNamespaces);
 }
-// UTILS:
-function formatNamespace(namespace, color) {
-    if (!namespace)
-        return '';
-    if (COLORS_ENABLED) {
-        const colorCode = Colors[color] || Colors.white;
-        return `${colorCode}${namespace}:${Colors.reset}`;
-    }
-    return `${namespace}:`;
-}
+const registry = getLoggerRegistry();
 function emitLog(namespace, args) {
     const event = { namespace, args };
     registry.getModules().forEach(module => module.onLog(event));
     console.log(...args);
 }
-function getCallStack() {
-    const excludeKeywords = ['logging.ts', 'node:internal', 'node_modules'];
-    const obj = {};
-    Error.captureStackTrace(obj, getCallStack);
-    return obj.stack
-        .split('\n')
-        .filter((line) => !excludeKeywords.some(keyword => line.includes(keyword)))
-        .join('\n');
-}
-export const executePromisesSequentially = async (promises) => {
-    const results = [];
-    for (const promiseFactory of promises) {
-        const result = await promiseFactory(); // Await each promise before proceeding
-        results.push(result);
-    }
-    return results;
-};

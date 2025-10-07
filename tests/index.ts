@@ -1,8 +1,8 @@
-import { executePromisesSequentially } from '../dist/index.js';
-import { color } from '../dist/lib/colors.js';
+import { executePromisesSequentially } from './test.utils.ts';
+import { color } from '../dist/colors.js';
 import loggerTest from './logger.test.ts';
 import performanceLoggerTest from './performanceLogger.test.ts';
-import bufferedLoggerTest from './bufferLogger.test.ts';	
+import bufferedLoggerTest from './bufferLogger.test.ts';
 
 const RUN_IN_PARALLEL = true;
 

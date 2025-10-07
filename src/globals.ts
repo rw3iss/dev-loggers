@@ -1,21 +1,28 @@
-import { COLORS_ENABLED, ALWAYS_LOG_WARNINGS, ALWAYS_LOG_ERRORS, LOG_ERROR_TRACES } from './config.js';
-import { LoggerOptions, Logger } from './loggers/Logger.js';
-import { PerformanceLogger, PerformanceLoggerOptions } from './loggers/PerformanceLogger.js';
-import { BufferedLogger, BufferedLoggerOptions } from './loggers/BufferedLogger.js';
-import { Colors } from './colors.js';
-import { LogEvent } from './LogEvent.js';
-import { LoggerRegistry } from './LoggerRegistry.js';
-import { LogModule } from './LogModule.js';
+import { LoggerOptions, Logger } from './lib/loggers/Logger.js';
+import { PerformanceLoggerOptions, PerformanceLogger } from './lib/loggers/PerformanceLogger.js';
+import { getLoggerRegistry, formatNamespace, getCallStack } from './utils.js';
+import { LogEvent } from './lib/LogEvent.js';
+import { BufferedLoggerOptions, BufferedLogger } from './lib/loggers/BufferedLogger.js';
+import { LogModule } from './lib/LogModule.js';
+import { ALWAYS_LOG_WARNINGS, ALWAYS_LOG_ERRORS, LOG_ERROR_TRACES } from './config.js';
 
-const registry = getLoggerRegistry();
+/* Global API:
+
+getLogger, getPerformanceLogger, getBufferedLogger
+
+log, warn, error
+
+addLogModule
+
+printLogCounts
+
+setLogAllMode
+
+*/
 
 // ============================================================================
 // LOGGER FACTORY FUNCTIONS
 // ============================================================================
-
-export function getLoggerRegistry() {
-	return LoggerRegistry.getInstance();
-}
 
 export function getLogger(namespace: string, opts: Partial<LoggerOptions> = {}): Logger {
 	if (!namespace) throw new Error('Must supply a namespace as first argument to getLogger');
@@ -55,17 +62,6 @@ export function getBufferedLogger(
 	}
 	return logger as BufferedLogger;
 }
-
-
-// ============================================================================
-// LOG MODULES
-// ============================================================================
-
-export function addLogModule(module: LogModule): void {
-	registry.addModule(module);
-}
-
-
 
 // ============================================================================
 // CORE LOGGING FUNCTIONS
@@ -123,6 +119,20 @@ export function error(namespaceOrFirstArg: string, ...args: any[]): void {
 	emitLog(namespace, finalArgs);
 }
 
+// ============================================================================
+// LOG MODULES
+// ============================================================================
+
+export function addLogModule(module: LogModule): void {
+	registry.addModule(module);
+}
+
+
+// ============================================================================
+// MISC CONTROLS
+// ============================================================================
+
+
 export function printLogCounts(): void {
 	registry.getAllLoggers().forEach(logger => {
 		if (logger instanceof PerformanceLogger) {
@@ -136,40 +146,10 @@ export function setLogAllMode(enabled: boolean, onlyNamespaces?: string[]): void
 }
 
 
-
-// UTILS:
-
-function formatNamespace(namespace: string, color: string): string {
-	if (!namespace) return '';
-
-	if (COLORS_ENABLED) {
-		const colorCode = Colors[color as keyof typeof Colors] || Colors.white;
-		return `${colorCode}${namespace}:${Colors.reset}`;
-	}
-	return `${namespace}:`;
-}
+const registry = getLoggerRegistry();
 
 function emitLog(namespace: string, args: any[]): void {
 	const event: LogEvent = { namespace, args };
 	registry.getModules().forEach(module => module.onLog(event));
 	console.log(...args);
-}
-
-function getCallStack(): string {
-	const excludeKeywords = ['logging.ts', 'node:internal', 'node_modules'];
-	const obj: any = {};
-	Error.captureStackTrace(obj, getCallStack);
-	return obj.stack
-		.split('\n')
-		.filter((line: string) => !excludeKeywords.some(keyword => line.includes(keyword)))
-		.join('\n');
-}
-
-export const executePromisesSequentially = async (promises: (() => Promise<any>)[]): Promise<any[]> => {
-	const results: any[] = [];
-	for (const promiseFactory of promises) {
-		const result = await promiseFactory(); // Await each promise before proceeding
-		results.push(result);
-	}
-	return results;
 }

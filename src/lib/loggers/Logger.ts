@@ -1,5 +1,5 @@
-import { log, warn, error } from '../utils.js';
-import { DEFAULT_LOG_COLOR } from '../config.js';
+import { log, warn, error } from '../../globals.js';
+import { DEFAULT_LOG_COLOR } from '../../config.js';
 
 export interface LoggerOptions {
 	namespace?: string;

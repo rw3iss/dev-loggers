@@ -1,4 +1,4 @@
-import { log, warn, error } from '../utils.js';
+import { log, warn, error } from '../../globals.js';
 export const DEFAULT_LOGGER_OPTIONS = {
     namespace: '',
     enabled: true,

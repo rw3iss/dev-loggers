@@ -1,11 +1,12 @@
 {
 	"name": "dev-loggers",
-	"version": "3.0.1",
+	"version": "2.0.0",
 	"description": "Minimal API and resource usage logging functionality. Supports namespaces, colors, and options, as well as LogModules for external classes to hook into the logging system. Includes basic Logger, PerformanceLogger, and BufferedLogger.",
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "tsc",
+		"build": "npm run clean && tsc",
+		"clean": "rm -rf dist",
 		"test": "npm run build && node tests/index.ts"
 	},
 	"devDependencies": {

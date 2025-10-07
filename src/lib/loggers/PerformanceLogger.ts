@@ -1,5 +1,5 @@
 import { DEFAULT_LOGGER_OPTIONS, Logger, LoggerOptions } from './Logger.js';
-import { log, warn, error } from '../utils.js';
+import { log, warn, error } from '../../globals.js';
 
 export interface PerformanceLoggerOptions extends LoggerOptions {
 	logCounts?: boolean;
