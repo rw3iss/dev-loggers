@@ -12,7 +12,7 @@ export interface LoggerOptions {
 export const DEFAULT_LOGGER_OPTIONS: Required<LoggerOptions> = {
 	namespace: '',
 	enabled: true,
-	color: '',
+	color: DEFAULT_LOG_COLOR || '',
 	prefix: '',
 	postfix: ''
 };

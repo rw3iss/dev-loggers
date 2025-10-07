@@ -5,7 +5,7 @@ const tryParseBool = (b: any, def: boolean | undefined = undefined) => {
 };
 
 export const LOG_ERROR_TRACES = process.env.LOG_ERROR_TRACES === 'true';
-export const ALWAYS_LOG_ERRORS = tryParseBool(process.env.ALWAYS_LOG_ERRORS, true);
-export const ALWAYS_LOG_WARNINGS = tryParseBool(process.env.ALWAYS_LOG_WARNINGS, true);
-export const COLORS_ENABLED = tryParseBool(process.env.LOGGING_COLORS_ENABLED, true);
-export const DEFAULT_LOG_COLOR = process.env.DEFAULT_LOG_COLOR || 'yellow';
+export const ALWAYS_LOG_ERRORS = tryParseBool(process.env.LOG_ERRORS_ALWAYS, true);
+export const ALWAYS_LOG_WARNINGS = tryParseBool(process.env.LOG_WARNINGS_ALWAYS, true);
+export const COLORS_ENABLED = tryParseBool(process.env.LOG_COLORS_ENABLED, true);
+export const DEFAULT_LOG_COLOR = process.env.LOG_COLOR_DEFAULT;

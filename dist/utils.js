@@ -8,7 +8,7 @@ export function getLoggerRegistry() {
 export function formatNamespace(namespace, color) {
     if (!namespace)
         return '';
-    if (COLORS_ENABLED) {
+    if (COLORS_ENABLED && color) {
         const colorCode = Colors[color] || Colors.white;
         return `${colorCode}${namespace}:${Colors.reset}`;
     }

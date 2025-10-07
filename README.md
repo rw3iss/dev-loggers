@@ -196,14 +196,14 @@ setLogAllMode(true);
 setLogAllMode(true, ['MyApp', 'Database']);
 
 // Print performance statistics for all PerformanceLoggers
-printLogCounts();
+printLogCounts();s
 ```
 
 ## Configuration
 
 The library respects these environment-level configurations:
-
-- `COLORS_ENABLED` - Enable/disable color output (useful to set this ENV on remote servers that don't support colors)
-- `ALWAYS_LOG_WARNINGS` - Log warnings even when logger is disabled
-- `ALWAYS_LOG_ERRORS` - Log errors even when logger is disabled
+- `LOG_COLORS_ENABLED` - Enable/disable color output (useful to set this ENV on remote servers that don't support colors)
+- `LOG_COLOR_DEFAULT` - Set a default color for logs from these modules
+- `LOG_ERRORS_ALWAYS` - Log errors even when logger is disabled
+- `LOG_WARNINGS_ALWAYS` - Log warnings even when logger is disabled
 - `LOG_ERROR_TRACES` - Include stack traces after each error log
