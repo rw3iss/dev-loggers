@@ -1,7 +1,7 @@
 {
 	"name": "dev-loggers",
-	"version": "3.1.1",
-	"description": "Minimal API and resource usage logging functionality. Supports namespaces, colors, and options, as well as LogModules for external classes to hook into the logging system. Includes basic Logger, PerformanceLogger, and BufferedLogger.",
+	"version": "4.0.0",
+	"description": "Minimal, zero-dependency logging primitives. Composable Sinks (console, panel, network, file), structured LogEvents, namespaced singleton loggers, and a canonical debug(id, ...args) entry point.",
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {

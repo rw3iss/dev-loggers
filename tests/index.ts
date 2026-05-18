@@ -3,13 +3,15 @@ import { color } from '../dist/colors.js';
 import loggerTest from './logger.test.ts';
 import performanceLoggerTest from './performanceLogger.test.ts';
 import bufferedLoggerTest from './bufferLogger.test.ts';
+import debugTest from './debug.test.ts';
 
 const RUN_IN_PARALLEL = true;
 
 const ALL_TESTS = [
 	loggerTest,
 	performanceLoggerTest,
-	bufferedLoggerTest
+	bufferedLoggerTest,
+	debugTest
 ]
 
 const summarizeResults = (results) => {

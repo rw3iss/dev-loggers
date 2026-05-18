@@ -1,9 +1,11 @@
 # dev-loggers
 
-Minimal, zero-dependency logging library.
-* Global singleton instances (namespaces)
-* Support for <span style="color: #3f80f8ff;">colorization</span> and other options
-* Logger, PerformanceLogger, BufferedLogger
+Minimal, zero-dependency logging primitives.
+
+- Namespaced singleton loggers (`Logger`, `PerformanceLogger`, `BufferedLogger`).
+- Composable **Sinks** — attach as many transports as you need (console, debug panel, file, network).
+- Canonical **`debug(id, ...args)`** entry point for structured per-id events.
+- ANSI color support and run-time enable/disable per namespace.
 
 ## Installation
 
@@ -11,199 +13,145 @@ Minimal, zero-dependency logging library.
 npm install dev-loggers
 ```
 
-## Quick Start
-
-Import the logger factory functions for the type of logger you need, and retrieve an instance using a namespace as first argument.
-
-If using these factory functions, all loggers with the same namespace use the global instance of that logger across all files.
+## Quick start
 
 ```typescript
-// import
+import { debug } from 'dev-loggers';
+
+debug('audio:attach', { tag: 'VIDEO', src: 'blob:…' });
+debug.scope('audio:attach').log('attempt 1');
+```
+
+By default a `ConsoleSink` is registered. Add more sinks (e.g. `dev-debug-panel`):
+
+```typescript
+import { attachSink } from 'dev-loggers';
+
+attachSink(myCustomSink);   // { name, write(event) }
+```
+
+## API surface
+
+### Canonical entry point: `debug(id, ...args)`
+
+```typescript
+import { debug } from 'dev-loggers';
+
+// One-shot
+debug('audio:attach', { tag: 'VIDEO' });
+
+// Fluent scope (binds the id once)
+const log = debug.scope('audio:attach');
+log.log('attempt 1');
+log.log('ok', { state: 'running' });
+```
+
+Each call produces a `LogEvent`:
+
+```typescript
+{
+  namespace: 'audio',          // everything before the first ':'
+  id: 'audio:attach',          // full id string
+  level: 'debug',
+  args: ['[audio:attach]', { tag: 'VIDEO' }],
+  data: { tag: 'VIDEO' },       // first object arg, hoisted for inspection
+  timestamp: 1719859200000,
+}
+```
+
+UI sinks (like dev-debug-panel) group entries by `id` and render `data` as a JSON tree.
+
+### Namespaced loggers
+
+```typescript
 import { getLogger, getPerformanceLogger, getBufferedLogger } from 'dev-loggers';
 
-// instantiate and get methods, at the top of a file
-const { log, error, warn } = getLogger('MyService');
+const { log, warn, error } = getLogger('MyApp', { color: 'cyan' });
+log('starting');
+warn('low memory');
+error('connection failed');
 
-// outputs to console "MyService: message"
-log('message');
+const perf = getPerformanceLogger('Render');
+perf.log('frame');  // first call: no elapsed
+perf.log('frame');  // subsequent: ` (Nms)` appended
 
-// disable or set a color for the logger:
-const { log } = getLogger('MyService', { enabled: false, color: 'blue' });
-```
-<b>Note:</b> If you call getLogger('namespace') with the same namespace in multiple files, it will use the same instance, but with the last configured options (if they happen to differ).
-
-
-You can also instantiate a Logger instance directly, and calling the log methods on it. However note that these will not be managed by the LoggerRegister, and therefore not be singleton instances.
-```typescript
-import { Logger } from 'dev-loggers';
-
-const logger = new Logger(); // namespace is optional
-
-logger.log('message');
+const buf = getBufferedLogger('Batch');
+buf.log('a'); buf.log('b'); buf.flush();
 ```
 
+The same `namespace` returns the same singleton instance. Re-registering with a different subtype throws.
 
-## Logger Types
-
-### 1. Logger (Basic)
-
-Standard logging with namespacing, colors, and customization options. Perfect for general application logging.
+### Sinks (the OCP extension point)
 
 ```typescript
-import { getLogger } from 'dev-loggers';
+import { attachSink, detachSink, Sink, LogEvent } from 'dev-loggers';
 
-const { log, warn, error } = getLogger('MyApp');
+const networkSink: Sink = {
+  name: 'network',
+  write(event: LogEvent) {
+    if (event.level === 'error') postToServer(event);
+  },
+};
 
-log('Application started');
-warn('Low memory warning');
-error('Connection failed');
+const handle = attachSink(networkSink);
+// later:
+detachSink(handle);
 ```
 
-**Output:**
-```
-MyApp: Application started
-MyApp: ⚠️ Warning: Low memory warning
-MyApp: 🛑 Error! Connection failed
-```
+Sinks are walked in attach order on every emit. The default `ConsoleSink` is always present; call `detachSink(loggers.getConsoleSink())` to remove it in tests.
 
-### 2. PerformanceLogger
-
-Extends Logger to measure and display time elapsed between log calls with the same ID. Ideal for profiling and performance monitoring.
-
-```typescript
-import { getPerformanceLogger } from 'dev-loggers';
-
-const { log } = getPerformanceLogger('Performance');
-
-log('(render)', 'Starting render');
-// ... do work ...
-log('(render)', 'Render complete');  // Shows elapsed time
-```
-
-**Output:**
-```
-Performance: (render) Starting render
-Performance: (render) Render complete (142ms)
-```
-
-**Additional Methods:**
-- `printCounts()` - Display call count statistics for all IDs
-- `reset()` - Clear all performance data
-- `time(id)` - Get elapsed time for an ID
-- `incr(id)` - Increment counter for an ID
-
-### 3. BufferedLogger
-
-Extends Logger to accumulate log messages and output them all at once. Useful for batch operations or conditional logging.
-
-```typescript
-import { getBufferedLogger } from 'dev-loggers';
-
-const { log, flush } = getBufferedLogger('Batch');
-
-log('Processing item 1');
-log('Processing item 2');
-log('Processing item 3');
-
-flush();  // Outputs all buffered messages
-```
-
-**Additional Methods:**
-- `flush()` - Output all buffered messages and clear buffer
-- `clear()` - Clear buffer without outputting
-- `getBufferSize()` - Get current buffer size
-
-## Customization
-
-### Logger Options
-
-All logger types accept an options object as the second parameter:
-
-```typescript
-const logger = getLogger('MyApp', {
-  color: 'cyan',           // Namespace color
-  enabled: true,           // Enable/disable logging
-  prefix: '[DEBUG]',       // Text before each message
-  postfix: '✓'             // Text after each message
-});
-```
-
-**Available Options:**
-- `color` - Color for the namespace (cyan, red, green, yellow, blue, magenta, white)
-- `enabled` - Enable or disable this logger
-- `prefix` - String to prepend to all messages
-- `postfix` - String to append to all messages
-
-### PerformanceLogger Options
-
-```typescript
-const perfLogger = getPerformanceLogger('Perf', {
-  logCounts: true,    // Track call counts
-  showIds: true       // Show IDs in output
-});
-```
-
-### BufferedLogger Options
-
-```typescript
-const bufLogger = getBufferedLogger('Buffer', {
-  maxBufferSize: 500  // Auto-flush when buffer exceeds this size
-});
-```
-
-## Standalone Functions
-
-You can use simple standalone logging functions without creating logger instances, which will just format and log to the console:
+### Plain standalone functions
 
 ```typescript
 import { log, warn, error } from 'dev-loggers';
 
-log('Simple message');
-warn('Warning message');
-error('Error message');
+log('hello');
+warn('careful');
+error('boom');
 ```
 
-## Advanced Features
-
-### LogModules - Custom Log Handlers
-
-Register external classes to receive all log events for custom processing (e.g., sending to external services, UI panels, etc.):
+### Runtime controls
 
 ```typescript
-import { addLogModule } from 'dev-loggers';
-import { LogModule, LogEvent } from 'dev-loggers';
+import {
+  setLogAllMode, enableLogger, disableLogger, getLoggerStates, printLogCounts,
+} from 'dev-loggers';
 
-class CustomLogHandler implements LogModule {
-  onLog(event: LogEvent) {
-    // event.namespace - the logger's namespace
-    // event.args - the log arguments
-    this.sendToExternalService(event);
-  }
-}
-
-addLogModule(new CustomLogHandler());
+setLogAllMode(true);                       // force-enable everything
+setLogAllMode(true, ['Audio', 'Render']);  // … but only these namespaces
+enableLogger('Audio');                     // toggle one at a time
+disableLogger('Render');
+getLoggerStates();                          // [{ namespace, enabled }, …]
+printLogCounts();                           // PerformanceLogger summaries
 ```
 
-### Global Controls
+## Environment variables
 
-```typescript
-import { setLogAllMode, printLogCounts } from 'dev-loggers';
+| Var | Default | Notes |
+|-----|---------|-------|
+| `LOG_COLORS_ENABLED` | `true` | Turn off ANSI codes for non-color terminals. |
+| `LOG_COLOR_DEFAULT` | (none) | Fallback color for unconfigured loggers. |
+| `LOG_ERRORS_ALWAYS` | `true` | Emit errors even when the logger is disabled. |
+| `LOG_WARNINGS_ALWAYS` | `false` | Same for warnings. |
+| `LOG_ERROR_TRACES` | `false` | Append a stack trace to every error. |
 
-// Enable/disable all loggers
-setLogAllMode(true);
+## Migration from v3
 
-// Enable only specific namespaces
-setLogAllMode(true, ['MyApp', 'Database']);
+`v4` is a major bump. Most v3 code keeps working unchanged. The breaking
+changes are:
 
-// Print performance statistics for all PerformanceLoggers
-printLogCounts();s
-```
+| v3 | v4 |
+|----|----|
+| `addLogModule({ name, onLog(event) })` | `attachSink({ name, write(event) })` (aliased — old shape still accepted) |
+| `LogEvent = { namespace, args }` | `LogEvent = { namespace, id?, level, args, data?, timestamp }` |
+| Same namespace + different factory → silently returns wrong subtype | Throws with a clear error |
+| No structured `debug()` | `debug(id, ...args)` + `debug.scope(id).log(...)` |
+| Emit always called `console.log(...)` | Emit walks the sink list; default `ConsoleSink` mirrors v3 behavior |
 
-## Configuration
+The `LogModule` symbol is still exported (alias of `Sink`). The
+`addLogModule()` function still exists (alias of `attachSink()`). Old
+code compiles. New code should use the new names.
 
-The library respects these environment-level configurations:
-- `LOG_COLORS_ENABLED` - Enable/disable color output (useful to set this ENV on remote servers that don't support colors)
-- `LOG_COLOR_DEFAULT` - Set a default color for logs from these modules
-- `LOG_ERRORS_ALWAYS` - Log errors even when logger is disabled
-- `LOG_WARNINGS_ALWAYS` - Log warnings even when logger is disabled
-- `LOG_ERROR_TRACES` - Include stack traces after each error log
+## License
+
+ISC

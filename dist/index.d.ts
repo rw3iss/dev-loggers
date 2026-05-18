@@ -3,6 +3,8 @@ export * from './lib/loggers/PerformanceLogger.js';
 export * from './lib/loggers/BufferedLogger.js';
 export * from './lib/LogEvent.js';
 export * from './lib/LoggerRegistry.js';
-export * from './lib/LogModule.js';
+export * from './lib/Sink.js';
+export * from './lib/ConsoleSink.js';
+export { LogModule } from './lib/Sink.js';
 export * from './globals.js';
 //# sourceMappingURL=index.d.ts.map

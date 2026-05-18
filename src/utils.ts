@@ -5,7 +5,6 @@ import { BufferedLogger, BufferedLoggerOptions } from './lib/loggers/BufferedLog
 import { Colors } from './colors.js';
 import { LogEvent } from './lib/LogEvent.js';
 import { LoggerRegistry } from './lib/LoggerRegistry.js';
-import { LogModule } from './lib/LogModule.js';
 
 export function getLoggerRegistry() {
 	return LoggerRegistry.getInstance();
