@@ -1,4 +1,4 @@
-import { debug, attachSink, detachSink } from '../dist/index.js';
+import { debug, attachSink, detachSink } from '../dist/index.esm.js';
 
 export default async () => {
 	const events: any[] = [];

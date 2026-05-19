@@ -1,4 +1,4 @@
-import { getBufferedLogger } from '../dist/index.js';
+import { getBufferedLogger } from '../dist/index.esm.js';
 
 const { log, flush } = getBufferedLogger("BufferedLogger", { color: 'blue' });
 

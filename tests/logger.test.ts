@@ -1,4 +1,4 @@
-import { getLogger } from '../dist/index.js';
+import { getLogger } from '../dist/index.esm.js';
 
 const { log } = getLogger("SimpleLogger");
 

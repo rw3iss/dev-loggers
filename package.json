@@ -1,22 +1,61 @@
 {
 	"name": "dev-loggers",
-	"version": "4.0.0",
-	"description": "Minimal, zero-dependency logging primitives. Composable Sinks (console, panel, network, file), structured LogEvents, namespaced singleton loggers, and a canonical debug(id, ...args) entry point.",
+	"version": "5.0.1",
+	"description": "Zero-dependency logging primitives (core) + a draggable in-page debug panel (panel). Tree-shakeable subpath exports — pull in only what you use.",
 	"type": "module",
-	"main": "dist/index.js",
-	"scripts": {
-		"build": "npm run clean && tsc",
-		"clean": "rm -rf dist",
-		"test": "npm run build && node tests/index.ts"
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.cjs"
+		},
+		"./panel": {
+			"types": "./dist/panel/index.d.ts",
+			"import": "./dist/panel/index.mjs",
+			"require": "./dist/panel/index.cjs"
+		},
+		"./package.json": "./package.json"
 	},
-	"devDependencies": {
-		"@types/node": "^24.6.1",
-		"typescript": "^5.9.3"
+	"sideEffects": [
+		"**/*.css",
+		"**/*.scss",
+		"./dist/panel/**/*",
+		"./src/panel/**/*"
+	],
+	"files": [
+		"dist/**/*",
+		"README.md"
+	],
+	"scripts": {
+		"build": "npm run clean && node build.js && tsc -p tsconfig.build.json",
+		"dev": "node build.js --watch",
+		"clean": "rm -rf dist",
+		"test": "npm run build && node tests/smoke.mjs",
+		"prepublishOnly": "npm run build"
 	},
 	"keywords": [
 		"logging",
-		"logger"
+		"logger",
+		"debug",
+		"debug-panel",
+		"console",
+		"sink",
+		"typescript"
 	],
+	"dependencies": {
+		"fast-safe-stringify": "^2.1.1",
+		"jsondiffpatch": "^0.7.3"
+	},
+	"devDependencies": {
+		"@types/node": "^24.6.1",
+		"esbuild": "^0.21.5",
+		"jsdom": "^29.1.1",
+		"sass": "^1.93.2",
+		"typescript": "^5.9.3"
+	},
 	"homepage": "https://github.com/rw3iss/dev-loggers#readme",
 	"bugs": {
 		"url": "https://github.com/rw3iss/dev-loggers/issues"

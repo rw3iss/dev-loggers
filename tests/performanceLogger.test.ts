@@ -1,4 +1,4 @@
-import { getPerformanceLogger } from '../dist/index.js';
+import { getPerformanceLogger } from '../dist/index.esm.js';
 
 const { log } = getPerformanceLogger("PerformanceLogger", { color: 'green' });
 

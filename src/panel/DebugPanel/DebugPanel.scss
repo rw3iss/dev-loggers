@@ -1,0 +1,620 @@
+// DebugPanel.scss
+.debug-panel {
+	position: fixed;
+	z-index: 99999;
+	background: #222;
+	border-radius: 8px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	font-family: Arial, sans-serif;
+	color: #fff;
+	transition:
+		transform 0.2s ease-in-out,
+		visibility 0.2s ease-in-out;
+
+	&.visible {
+		visibility: visible;
+		transform: translateY(0);
+	}
+
+	&:not(.visible) {
+		visibility: hidden;
+		transform: translateY(10px);
+		pointer-events: none;
+	}
+
+	// Tab Navigation
+	.debug-panel-tabs {
+		display: flex;
+		flex-wrap: wrap;
+		background: #111;
+		padding: 5px;
+		gap: 5px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		cursor: grab;
+		user-select: none;
+
+		&:active {
+			cursor: grabbing;
+		}
+
+		.debug-tab {
+			background: #333;
+			color: #ccc;
+			padding: 5px 10px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			transition: background 0.2s ease-in-out;
+
+			&:hover {
+				background: #444;
+				color: #fff;
+			}
+
+			&:focus {
+				outline: none;
+			}
+
+			&.active {
+				background: #007bff;
+				color: #fff;
+			}
+		}
+	}
+
+	// Content Area
+	.debug-panel-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		overflow-y: auto;
+		padding: 0px 15px;
+		background: #1a1a1a;
+
+		.debug-tab-content {
+			display: none;
+			flex-direction: column;
+			flex: 1;
+			gap: 5px;
+			min-height: 0;
+
+			// Per-tab toolbar (Copy + Clear).
+			.debug-tab-toolbar {
+				position: sticky;
+				top: 0;
+				z-index: 2;
+				display: flex;
+				justify-content: flex-end;
+				gap: 6px;
+				padding: 6px 0;
+				background: #1a1a1a;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+				margin-bottom: 4px;
+
+				.debug-tab-action {
+					background: #2a2a2a;
+					color: #ccc;
+					border: 1px solid #333;
+					padding: 3px 8px;
+					font-size: 11px;
+					border-radius: 3px;
+					cursor: pointer;
+					display: inline-flex;
+					align-items: center;
+					gap: 4px;
+					transition:
+						background 0.15s,
+						color 0.15s,
+						border-color 0.15s;
+
+					&:hover {
+						background: #333;
+						color: #fff;
+						border-color: #444;
+					}
+
+					&:focus {
+						outline: none;
+					}
+
+					span {
+						font-size: 12px;
+						line-height: 1;
+					}
+				}
+
+				.debug-tab-action-clear:hover {
+					background: #6b2a2a;
+					border-color: #8c3333;
+					color: #fff;
+				}
+			}
+
+			.debug-tab-entries {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				flex: 1;
+			}
+
+			// Log Entries
+			.debug-log-entry {
+				background: #292929;
+				color: #ddd;
+				padding: 5px 8px;
+				border-radius: 4px;
+				font-size: 12px;
+				word-break: break-word;
+				border-left: 3px solid #007bff;
+				position: relative;
+				display: flex;
+				align-items: center;
+
+				&:hover {
+					.debug-delete-button,
+					.debug-copy-button {
+						opacity: 1;
+					}
+				}
+
+				.debug-log-entry-text {
+					flex: 1;
+					padding-right: 70px;
+				}
+
+				.debug-log-entry-data {
+					margin-top: 4px;
+					padding: 4px 6px;
+					background: #1f1f1f;
+					border-radius: 3px;
+					font-family: 'JetBrains Mono', 'SF Mono', monospace;
+					font-size: 11px;
+				}
+
+				&.debug-log-entry-error {
+					border-left-color: #ff5252;
+				}
+				&.debug-log-entry-warn {
+					border-left-color: #ffb84d;
+				}
+				&.debug-log-entry-debug {
+					border-left-color: #66b3ff;
+				}
+
+				.debug-action-button {
+					position: absolute;
+					top: 50%;
+					transform: translateY(-50%);
+					background: rgba(100, 100, 100, 0.8);
+					color: white;
+					border: none;
+					cursor: pointer;
+					font-size: 12px;
+					font-weight: bold;
+					width: 20px;
+					height: 20px;
+					border-radius: 50%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					opacity: 0;
+					transition:
+						opacity 0.2s ease-in-out,
+						background 0.2s ease-in-out;
+
+					&:hover {
+						background: rgba(150, 150, 150, 1);
+					}
+				}
+
+				.debug-copy-button {
+					@extend .debug-action-button;
+					right: 36px;
+					background: rgba(85, 170, 255, 0.8);
+
+					&:hover {
+						background: rgba(34, 136, 255, 1);
+					}
+				}
+
+				.debug-delete-button {
+					@extend .debug-action-button;
+					right: 8px;
+					background: rgba(255, 85, 85, 0.8);
+
+					&:hover {
+						background: rgba(255, 34, 34, 1);
+					}
+				}
+			}
+		}
+	}
+
+	// Toolbar
+	.debug-toolbar {
+		display: flex;
+		width: 100%;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 8px;
+		padding: 8px;
+		background: #111;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		flex-wrap: wrap;
+
+		.debug-keyboard-hint {
+			margin-right: auto;
+			color: #999;
+			font-size: 11px;
+			white-space: nowrap;
+		}
+
+		.debug-opacity-container {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+			max-width: 100px;
+			min-width: 40px;
+			flex-shrink: 1;
+			padding: 5px 0;
+
+			.debug-opacity-label {
+				font-size: 11px;
+				color: #999;
+				white-space: nowrap;
+			}
+
+			.debug-opacity-slider {
+				flex: 1;
+				min-width: 40px;
+				width: 100%;
+				max-width: 100%;
+				height: 4px;
+				background: #444;
+				border-radius: 2px;
+				outline: none;
+				-webkit-appearance: none;
+				appearance: none;
+
+				&::-webkit-slider-thumb {
+					-webkit-appearance: none;
+					appearance: none;
+					width: 14px;
+					height: 14px;
+					background: #007bff;
+					cursor: pointer;
+					border-radius: 50%;
+					position: relative;
+					top: -4px;
+					transition: background 0.2s;
+
+					&:hover {
+						background: #0056b3;
+					}
+				}
+
+				&::-moz-range-thumb {
+					width: 14px;
+					height: 14px;
+					background: #007bff;
+					cursor: pointer;
+					border-radius: 50%;
+					border: none;
+					position: relative;
+					top: -4px;
+					transition: background 0.2s;
+
+					&:hover {
+						background: #0056b3;
+					}
+				}
+
+				&::-webkit-slider-runnable-track {
+					height: 4px;
+					background: #444;
+					border-radius: 2px;
+				}
+
+				&::-moz-range-track {
+					height: 4px;
+					background: #444;
+					border-radius: 2px;
+				}
+			}
+		}
+
+		button {
+			background: #d9534f;
+			color: white;
+			border: none;
+			padding: 6px 12px;
+			border-radius: 4px;
+			font-size: 12px;
+			cursor: pointer;
+			transition: background 0.2s;
+			white-space: nowrap;
+			flex-shrink: 0;
+
+			&:hover {
+				background: #c9302c;
+			}
+
+			&:focus {
+				outline: none;
+			}
+		}
+	}
+
+	// Responsive layout for narrow panels
+	.debug-toolbar {
+		container-type: inline-size;
+
+		// When panel width is less than 400px, stack toolbar vertically
+		@container (max-width: 350px) {
+			flex-direction: column;
+			align-items: stretch;
+
+			.debug-keyboard-hint {
+				display: none;
+			}
+
+			.debug-opacity-container {
+				max-width: 100%;
+				justify-content: center;
+			}
+		}
+	}
+
+	// Container query alternative using JavaScript-set class
+	&.narrow-panel {
+		.debug-toolbar {
+			flex-direction: column;
+			align-items: stretch;
+
+			.debug-keyboard-hint {
+				margin-right: 0;
+				text-align: center;
+			}
+
+			.debug-opacity-container {
+				max-width: 100%;
+				justify-content: center;
+			}
+		}
+	}
+
+	// Resize Handles
+	.resize-handle {
+		position: absolute;
+		background: rgba(255, 255, 255, 0.1);
+		z-index: 10;
+		transition: background 0.2s;
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.3);
+		}
+	}
+
+	.resize-left,
+	.resize-right {
+		top: 0;
+		bottom: 0;
+		width: 6px;
+		cursor: ew-resize;
+	}
+
+	.resize-left {
+		left: -3px;
+	}
+
+	.resize-right {
+		right: -3px;
+	}
+
+	.resize-top,
+	.resize-bottom {
+		left: 0;
+		right: 0;
+		height: 6px;
+		cursor: ns-resize;
+	}
+
+	.resize-top {
+		top: -3px;
+	}
+
+	.resize-bottom {
+		bottom: -3px;
+	}
+
+	.resize-top-left,
+	.resize-top-right,
+	.resize-bottom-left,
+	.resize-bottom-right {
+		width: 10px;
+		height: 10px;
+	}
+
+	.resize-top-left {
+		left: -3px;
+		top: -3px;
+		cursor: nwse-resize;
+	}
+
+	.resize-top-right {
+		right: -3px;
+		top: -3px;
+		cursor: nesw-resize;
+	}
+
+	.resize-bottom-left {
+		left: -3px;
+		bottom: -3px;
+		cursor: nesw-resize;
+	}
+
+	.resize-bottom-right {
+		right: -3px;
+		bottom: -3px;
+		cursor: nwse-resize;
+	}
+}
+
+// Debug State Container
+.debug-state {
+	position: relative;
+	flex: 1 0 100%;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 10px;
+	margin-left: 10px;
+
+	.json-toggle {
+		position: absolute;
+		top: 7px;
+		left: -20px;
+		margin-right: 5px;
+		border: none;
+		background: none;
+		cursor: pointer;
+		color: #888;
+		font-size: 14px;
+		padding: 0;
+		width: 20px;
+		height: 20px;
+		transition: color 0.2s;
+
+		&:hover {
+			color: #fff;
+		}
+
+		&:focus {
+			outline: none;
+		}
+	}
+
+	.debug-state-label {
+		font-size: 13px;
+		font-weight: bold;
+		padding: 5px 0;
+		color: #ccc;
+		&:hover {
+			color: #fff;
+			cursor: pointer;
+			text-decoration: underline;
+		}
+	}
+
+	.json-wrapper {
+		padding: 5px;
+		margin-left: -15px;
+		background: #292929;
+		border-radius: 4px;
+		border-left: 3px solid #28a745;
+	}
+
+	&.collapsed {
+		.json-wrapper {
+			display: none;
+		}
+	}
+}
+
+// ─── Config tab ─────────────────────────────────────────
+.debug-config-wrapper {
+	padding: 8px;
+	font-size: 12px;
+}
+
+.debug-config-header {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #333;
+}
+
+.debug-config-btn {
+	background: #3b82f6;
+	color: #fff;
+	border: none;
+	border-radius: 3px;
+	padding: 4px 10px;
+	font-size: 11px;
+	cursor: pointer;
+
+	&:hover { background: #2563eb; }
+
+	&.debug-config-btn-secondary {
+		background: #444;
+		&:hover { background: #555; }
+	}
+}
+
+.debug-config-empty {
+	color: #666;
+	padding: 16px 8px;
+	text-align: center;
+}
+
+.debug-config-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.debug-config-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 5px 8px;
+	border-radius: 3px;
+	cursor: pointer;
+
+	&:hover { background: #2a2a2a; }
+
+	&.debug-config-overridden {
+		.debug-config-label { color: #e4e4e7; }
+	}
+}
+
+.debug-config-toggle {
+	position: relative;
+	width: 32px;
+	height: 18px;
+	border-radius: 9px;
+	border: none;
+	background: #444;
+	cursor: pointer;
+	padding: 0;
+	flex-shrink: 0;
+	transition: background 0.2s;
+
+	&.debug-config-toggle-on {
+		background: #3b82f6;
+
+		.debug-config-toggle-thumb {
+			transform: translateX(14px);
+		}
+	}
+}
+
+.debug-config-toggle-thumb {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #fff;
+	transition: transform 0.2s;
+}
+
+.debug-config-label {
+	color: #999;
+	font-family: 'JetBrains Mono', 'SF Mono', monospace;
+	font-size: 12px;
+}

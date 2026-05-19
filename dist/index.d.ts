@@ -1,10 +1,2 @@
-export * from './lib/loggers/Logger.js';
-export * from './lib/loggers/PerformanceLogger.js';
-export * from './lib/loggers/BufferedLogger.js';
-export * from './lib/LogEvent.js';
-export * from './lib/LoggerRegistry.js';
-export * from './lib/Sink.js';
-export * from './lib/ConsoleSink.js';
-export { LogModule } from './lib/Sink.js';
-export * from './globals.js';
+export * from './core/index.js';
 //# sourceMappingURL=index.d.ts.map

@@ -1,0 +1,75 @@
+// JSON Tree Styles
+.json-node {
+	position: relative;
+	margin-left: 20px;
+	padding-left: 0;
+	font-size: 12px;
+	line-height: 1.4em;
+
+	.json-properties {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.json-property {
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+		padding: 2px 0;
+
+		&.object {
+			flex-direction: column;
+		}
+	}
+
+	.json-key {
+		font-weight: bold;
+		margin-right: 5px;
+		color: #9cdcfe;
+
+		&.clickable {
+			cursor: pointer;
+
+			&:hover {
+				color: #4fc3f7;
+				text-decoration: underline;
+			}
+		}
+	}
+
+	.json-value {
+		color: #ce9178;
+		white-space: pre-wrap;
+		word-break: break-word;
+		flex: 1;
+	}
+
+	.json-toggle {
+		position: absolute;
+		top: 2px;
+		left: -20px;
+		border: none;
+		background: none;
+		cursor: pointer;
+		color: #888;
+		font-size: 12px;
+		padding: 0;
+		width: 16px;
+		height: 16px;
+		transition: color 0.2s;
+
+		&:hover {
+			color: #fff;
+		}
+
+		&:focus {
+			outline: none;
+		}
+	}
+
+	.collapsed {
+		.json-properties {
+			display: none;
+		}
+	}
+}
